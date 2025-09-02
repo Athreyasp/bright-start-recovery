@@ -32,10 +32,12 @@ const LandingPage = () => {
                 and a community that understands. Every step forward matters.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" variant="hero" className="text-lg px-8 py-4">
-                  Join Now
-                </Button>
-                <Link to="/dashboard">
+                <Link to="/auth">
+                  <Button size="lg" variant="hero" className="text-lg px-8 py-4">
+                    Join Now
+                  </Button>
+                </Link>
+                <Link to="/auth">
                   <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
                     Login
                   </Button>
@@ -179,7 +181,9 @@ const LandingPage = () => {
             Join thousands who have transformed their lives with personalized support and proven strategies.
           </p>
           <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
-            Start My Journey
+            <Link to="/auth" className="text-inherit no-underline">
+              Start My Journey
+            </Link>
           </Button>
         </div>
       </section>

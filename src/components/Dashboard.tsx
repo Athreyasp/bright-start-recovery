@@ -1,11 +1,59 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle } from "lucide-react";
+import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase, RiskAssessment, DailyCheckIn } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const riskScore = 25; // Mock risk score
+  const { user, profile, signOut } = useAuth();
+  const { toast } = useToast();
+  const [riskScore, setRiskScore] = useState<number | null>(null);
+  const [todayCheckIn, setTodayCheckIn] = useState<DailyCheckIn | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch latest risk assessment
+      const { data: riskData } = await supabase
+        .from('risk_assessments')
+        .select('risk_score')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (riskData) {
+        setRiskScore(riskData.risk_score);
+      }
+
+      // Check if user has done today's check-in
+      const today = new Date().toISOString().split('T')[0];
+      const { data: checkInData } = await supabase
+        .from('daily_check_ins')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('check_in_date', today)
+        .single();
+
+      setTodayCheckIn(checkInData);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const getRiskColor = (score: number) => {
     if (score <= 30) return "text-success";
@@ -52,7 +100,7 @@ const Dashboard = () => {
       icon: Brain,
       color: "text-accent",
       bgColor: "bg-accent/10",
-      href: "/dashboard/psychologist"
+      href: "/dashboard/appointments?type=psychologist"
     },
     {
       title: "Psychiatrist",
@@ -60,7 +108,7 @@ const Dashboard = () => {
       icon: Stethoscope,
       color: "text-secondary",
       bgColor: "bg-secondary/20",
-      href: "/dashboard/psychiatrist"
+      href: "/dashboard/appointments?type=psychiatrist"
     },
     {
       title: "AI Chatbot",
@@ -76,7 +124,7 @@ const Dashboard = () => {
       icon: User,
       color: "text-muted-foreground",
       bgColor: "bg-muted/50",
-      href: "/dashboard/portfolio"
+      href: "/dashboard/profile"
     },
     {
       title: "Symptom Detector",
@@ -84,9 +132,24 @@ const Dashboard = () => {
       icon: Activity,
       color: "text-primary",
       bgColor: "bg-primary/10",
-      href: "/dashboard/symptoms"
+      href: "/dashboard/daily-checkin"
     }
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background font-poppins">
@@ -99,14 +162,19 @@ const Dashboard = () => {
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
+              {!todayCheckIn && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">1</Badge>
+              )}
             </Button>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
               </div>
-              <span className="font-medium">Welcome, Alex</span>
+              <span className="font-medium">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</span>
             </div>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
@@ -114,9 +182,31 @@ const Dashboard = () => {
       {/* Main Dashboard */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, Alex</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.full_name || 'friend'}</h1>
           <p className="text-muted-foreground">Here's your recovery dashboard. You're doing great - keep it up!</p>
         </div>
+
+        {/* Alert for daily check-in */}
+        {!todayCheckIn && (
+          <Card className="mb-8 border-warning/50 bg-warning/5">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-warning/20 rounded-full flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Don't forget your daily check-in!</h3>
+                    <p className="text-sm text-muted-foreground">How are you feeling today? Track your mood and progress.</p>
+                  </div>
+                </div>
+                <Link to="/dashboard/daily-checkin">
+                  <Button>Complete Check-in</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -132,7 +222,7 @@ const Dashboard = () => {
                 <CardContent>
                   <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
                   
-                  {module.special && (
+                  {module.special && module.riskScore !== null && (
                     <div className="space-y-3">
                       <div className={`flex items-center justify-between p-3 rounded-lg border ${getRiskBgColor(module.riskScore)}`}>
                         <span className="text-sm font-medium">Current Risk Score</span>
@@ -150,8 +240,17 @@ const Dashboard = () => {
                             style={{ width: `${module.riskScore}%` }}
                           />
                         </div>
-                        <span className="text-xs text-muted-foreground">Low Risk</span>
+                        <span className="text-xs text-muted-foreground">
+                          {module.riskScore <= 30 ? 'Low Risk' : module.riskScore <= 70 ? 'Moderate' : 'High Risk'}
+                        </span>
                       </div>
+                    </div>
+                  )}
+
+                  {module.special && module.riskScore === null && (
+                    <div className="text-center p-4 border-2 border-dashed border-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-2">No assessment yet</p>
+                      <Button variant="outline" size="sm">Take Assessment</Button>
                     </div>
                   )}
                   
@@ -170,47 +269,59 @@ const Dashboard = () => {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-foreground mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-primary" />
+            <Link to="/dashboard/daily-checkin">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Daily Check-in</h3>
+                      <p className="text-sm text-muted-foreground">Log today's mood & activities</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">Daily Check-in</h3>
-                    <p className="text-sm text-muted-foreground">Log today's mood & activities</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-soft-green/20 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-soft-green" />
+            <Link to="/dashboard/chatbot">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-soft-green/20 rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-soft-green" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Get Support</h3>
+                      <p className="text-sm text-muted-foreground">Chat with AI assistant</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">Connect with Peers</h3>
-                    <p className="text-sm text-muted-foreground">Join support groups</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
-                    <MessageCircle className="w-5 h-5 text-warning" />
+            <div className="cursor-pointer" onClick={() => {
+              toast({
+                title: "Emergency Support",
+                description: "If you're in crisis, please call 988 or your local emergency services.",
+                variant: "destructive"
+              });
+            }}>
+              <Card className="hover:shadow-md transition-shadow border-destructive/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-destructive" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-destructive">Emergency Support</h3>
+                      <p className="text-sm text-muted-foreground">Get immediate help</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">Emergency Support</h3>
-                    <p className="text-sm text-muted-foreground">Get immediate help</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>

@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase, RiskAssessment } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 const RiskCalculator = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
   const [formData, setFormData] = useState({
     yearsOfUse: 0,
     substanceType: "",
@@ -20,8 +28,56 @@ const RiskCalculator = () => {
   });
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [recommendations, setRecommendations] = useState<string[]>([]);
 
-  const calculateRisk = () => {
+  useEffect(() => {
+    // Load previous assessment if exists
+    if (user) {
+      loadPreviousAssessment();
+    }
+  }, [user]);
+
+  const loadPreviousAssessment = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('risk_assessments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const assessment = data[0];
+        setFormData({
+          yearsOfUse: assessment.years_of_use,
+          substanceType: assessment.substance_type,
+          frequency: assessment.frequency,
+          stressLevel: [assessment.stress_level],
+          sleepQuality: [assessment.sleep_quality],
+          supportSystem: assessment.support_system,
+          lastRelapse: assessment.last_relapse,
+        });
+        setRiskScore(assessment.risk_score);
+        setRecommendations(assessment.recommendations || []);
+        if (assessment.risk_score !== null) {
+          setShowResults(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading previous assessment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateRisk = async () => {
+    if (!user) return;
+
+    setSaving(true);
+    
     // Simple risk calculation algorithm
     let score = 0;
     
@@ -50,8 +106,43 @@ const RiskCalculator = () => {
     else if (formData.lastRelapse === "within-year") score += 15;
     
     const finalScore = Math.min(Math.max(score, 0), 100);
-    setRiskScore(finalScore);
-    setShowResults(true);
+    const recs = getRecommendations(finalScore);
+    
+    // Save to database
+    try {
+      const { error } = await supabase.from('risk_assessments').insert({
+        user_id: user.id,
+        years_of_use: formData.yearsOfUse,
+        substance_type: formData.substanceType,
+        frequency: formData.frequency,
+        stress_level: formData.stressLevel[0],
+        sleep_quality: formData.sleepQuality[0],
+        support_system: formData.supportSystem,
+        last_relapse: formData.lastRelapse,
+        risk_score: finalScore,
+        recommendations: recs
+      });
+
+      if (error) throw error;
+
+      setRiskScore(finalScore);
+      setRecommendations(recs);
+      setShowResults(true);
+      
+      toast({
+        title: "Assessment Complete",
+        description: "Your risk assessment has been saved and personalized recommendations generated.",
+      });
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save assessment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getRiskLevel = (score: number) => {
@@ -65,7 +156,8 @@ const RiskCalculator = () => {
       "Continue your current recovery practices",
       "Maintain regular check-ins with your support network",
       "Consider preventive counseling sessions",
-      "Keep up healthy lifestyle habits"
+      "Keep up healthy lifestyle habits",
+      "Schedule regular medical check-ups"
     ];
     
     if (score <= 70) return [
@@ -73,7 +165,8 @@ const RiskCalculator = () => {
       "Schedule regular therapy sessions",
       "Implement stress management techniques",
       "Consider intensive outpatient programs",
-      "Strengthen your support network"
+      "Strengthen your support network",
+      "Create a detailed relapse prevention plan"
     ];
     
     return [
@@ -82,9 +175,21 @@ const RiskCalculator = () => {
       "Daily check-ins with counselor or sponsor",
       "Remove triggers from environment",
       "Activate crisis intervention plan",
-      "Contact emergency support immediately if needed"
+      "Contact emergency support immediately if needed",
+      "Consider medication-assisted treatment"
     ];
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background font-poppins p-4 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (showResults && riskScore !== null) {
     const riskInfo = getRiskLevel(riskScore);
@@ -175,7 +280,7 @@ const RiskCalculator = () => {
                   }`}>
                     <h4 className="font-semibold mb-2">Immediate Actions:</h4>
                     <ul className="space-y-2">
-                      {getRecommendations(riskScore).map((recommendation, index) => (
+                      {recommendations.map((recommendation, index) => (
                         <li key={index} className="flex items-start">
                           <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-success flex-shrink-0" />
                           <span className="text-sm">{recommendation}</span>
@@ -185,9 +290,21 @@ const RiskCalculator = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    <Button className="w-full">Schedule Professional Consultation</Button>
-                    <Button variant="secondary" className="w-full">Join Support Group</Button>
-                    <Button variant="outline" className="w-full">Download Crisis Plan</Button>
+                    <Link to="/dashboard/appointments">
+                      <Button className="w-full">Schedule Professional Consultation</Button>
+                    </Link>
+                    <Link to="/dashboard/chatbot">
+                      <Button variant="secondary" className="w-full">Chat with AI Support</Button>
+                    </Link>
+                    <Button variant="outline" className="w-full" onClick={() => {
+                      // Generate and download crisis plan
+                      toast({
+                        title: "Crisis Plan",
+                        description: "Your personalized crisis plan will be available soon.",
+                      });
+                    }}>
+                      Download Crisis Plan
+                    </Button>
                   </div>
                   
                   <div className="text-center text-sm text-muted-foreground">
@@ -196,6 +313,12 @@ const RiskCalculator = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Button variant="outline" onClick={() => setShowResults(false)}>
+              Retake Assessment
+            </Button>
           </div>
         </div>
       </div>
@@ -356,9 +479,10 @@ const RiskCalculator = () => {
               onClick={calculateRisk} 
               className="w-full" 
               size="lg"
-              disabled={!formData.substanceType || !formData.frequency || !formData.supportSystem || !formData.lastRelapse}
+              disabled={!formData.substanceType || !formData.frequency || !formData.supportSystem || !formData.lastRelapse || saving}
             >
-              Calculate My Risk Score
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving ? "Saving Assessment..." : "Calculate My Risk Score"}
             </Button>
           </CardContent>
         </Card>
