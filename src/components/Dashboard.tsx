@@ -1,0 +1,221 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const Dashboard = () => {
+  const riskScore = 25; // Mock risk score
+  
+  const getRiskColor = (score: number) => {
+    if (score <= 30) return "text-success";
+    if (score <= 70) return "text-warning";
+    return "text-destructive";
+  };
+
+  const getRiskBgColor = (score: number) => {
+    if (score <= 30) return "bg-success/10 border-success/20";
+    if (score <= 70) return "bg-warning/10 border-warning/20";
+    return "bg-destructive/10 border-destructive/20";
+  };
+
+  const modules = [
+    {
+      title: "Risk Calculator",
+      description: "AI-powered relapse risk assessment",
+      icon: Calculator,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      href: "/dashboard/risk-calculator",
+      special: true,
+      riskScore: riskScore
+    },
+    {
+      title: "Consent Forms",
+      description: "Digital forms for family & friends",
+      icon: FileText,
+      color: "text-soft-green",
+      bgColor: "bg-soft-green/10",
+      href: "/dashboard/consent-forms"
+    },
+    {
+      title: "Doctor Appointments",
+      description: "Schedule & manage medical visits",
+      icon: Calendar,
+      color: "text-calm-blue",
+      bgColor: "bg-calm-blue/10",
+      href: "/dashboard/appointments"
+    },
+    {
+      title: "Psychologist",
+      description: "Licensed therapy sessions",
+      icon: Brain,
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+      href: "/dashboard/psychologist"
+    },
+    {
+      title: "Psychiatrist",
+      description: "Medication & specialized care",
+      icon: Stethoscope,
+      color: "text-secondary",
+      bgColor: "bg-secondary/20",
+      href: "/dashboard/psychiatrist"
+    },
+    {
+      title: "AI Chatbot",
+      description: "24/7 support & motivation",
+      icon: Bot,
+      color: "text-warning",
+      bgColor: "bg-warning/10",
+      href: "/dashboard/chatbot"
+    },
+    {
+      title: "User Portfolio",
+      description: "Recovery timeline & achievements",
+      icon: User,
+      color: "text-muted-foreground",
+      bgColor: "bg-muted/50",
+      href: "/dashboard/portfolio"
+    },
+    {
+      title: "Symptom Detector",
+      description: "Daily mood & symptom tracking",
+      icon: Activity,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      href: "/dashboard/symptoms"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background font-poppins">
+      {/* Header */}
+      <header className="bg-card border-b px-4 py-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <Link to="/" className="text-2xl font-bold text-primary">RecoveryPath</Link>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" className="relative">
+              <Bell className="w-5 h-5" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
+            </Button>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <span className="font-medium">Welcome, Alex</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Dashboard */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, Alex</h1>
+          <p className="text-muted-foreground">Here's your recovery dashboard. You're doing great - keep it up!</p>
+        </div>
+
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {modules.map((module) => (
+            <Link key={module.title} to={module.href}>
+              <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
+                <CardHeader className="pb-3">
+                  <div className={`w-12 h-12 ${module.bgColor} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                    <module.icon className={`w-6 h-6 ${module.color}`} />
+                  </div>
+                  <CardTitle className="text-lg font-semibold">{module.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
+                  
+                  {module.special && (
+                    <div className="space-y-3">
+                      <div className={`flex items-center justify-between p-3 rounded-lg border ${getRiskBgColor(module.riskScore)}`}>
+                        <span className="text-sm font-medium">Current Risk Score</span>
+                        <span className={`text-2xl font-bold ${getRiskColor(module.riskScore)}`}>
+                          {module.riskScore}%
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 bg-muted rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-500 ${
+                              module.riskScore <= 30 ? 'bg-success' : 
+                              module.riskScore <= 70 ? 'bg-warning' : 'bg-destructive'
+                            }`}
+                            style={{ width: `${module.riskScore}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Low Risk</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {!module.special && (
+                    <Button variant="ghost" size="sm" className="w-full justify-start p-0 h-auto text-primary hover:text-primary/80">
+                      Access Now →
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Daily Check-in</h3>
+                    <p className="text-sm text-muted-foreground">Log today's mood & activities</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-soft-green/20 rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-soft-green" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Connect with Peers</h3>
+                    <p className="text-sm text-muted-foreground">Join support groups</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Emergency Support</h3>
+                    <p className="text-sm text-muted-foreground">Get immediate help</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
