@@ -42,12 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          await fetchProfile(session.user.id)
+          // Use setTimeout to defer async operations and prevent deadlocks
+          setTimeout(() => {
+            fetchProfile(session.user.id)
+          }, 0)
           // Redirect to dashboard on successful login
           if (event === 'SIGNED_IN') {
             navigate('/dashboard')
@@ -68,9 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error
       }
 
