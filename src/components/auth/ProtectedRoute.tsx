@@ -1,13 +1,16 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthForm } from "./AuthForm";
 import { Loader2 } from "lucide-react";
+import { useLocation, Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAuth?: boolean;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -20,8 +23,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
+  // If we're on the landing page and user is authenticated, redirect to dashboard
+  if (location.pathname === "/" && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // For dashboard routes, require authentication
+  if (requireAuth && !user) {
     return <AuthForm />;
+  }
+
+  // For landing page when not authenticated, show the landing page
+  if (!requireAuth && !user) {
+    return <>{children}</>;
   }
 
   return <>{children}</>;

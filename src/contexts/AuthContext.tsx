@@ -3,6 +3,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import type { Database } from '@/integrations/supabase/types'
 import { useToast } from '@/hooks/use-toast'
+import { useNavigate } from 'react-router-dom'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Get initial session
@@ -46,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           await fetchProfile(session.user.id)
+          // Redirect to dashboard on successful login
+          if (event === 'SIGNED_IN') {
+            navigate('/dashboard')
+          }
         } else {
           setProfile(null)
         }
@@ -61,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single()
 
       if (error && error.code !== 'PGRST116') {
@@ -87,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!error) {
       toast({
-        title: "Welcome to RecoveryPath!",
+        title: "Welcome to QuitBuddy!",
         description: "Please check your email to verify your account.",
       })
     }

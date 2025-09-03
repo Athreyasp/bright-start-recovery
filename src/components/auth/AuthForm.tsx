@@ -91,7 +91,7 @@ export function AuthForm() {
     <div className="min-h-screen bg-gradient-to-br from-calm-blue-light to-soft-green-light flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-3xl font-bold text-primary">RecoveryPath</Link>
+          <Link to="/" className="text-3xl font-bold text-primary">QuitBuddy</Link>
           <p className="text-muted-foreground mt-2">Your journey to recovery starts here</p>
         </div>
 
