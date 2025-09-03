@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Heart, Brain, Moon, Activity, Target, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, DailyCheckIn as DailyCheckInType } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const DailyCheckIn = () => {
@@ -16,7 +16,7 @@ const DailyCheckIn = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [existingCheckIn, setExistingCheckIn] = useState<DailyCheckInType | null>(null);
+  const [existingCheckIn, setExistingCheckIn] = useState<any | null>(null);
 
   const [formData, setFormData] = useState({
     moodScore: [7],
@@ -56,17 +56,17 @@ const DailyCheckIn = () => {
         .from('daily_check_ins')
         .select('*')
         .eq('user_id', user.id)
-        .eq('check_in_date', today)
+        .eq('date', today)
         .single();
 
       if (data) {
         setExistingCheckIn(data);
         setFormData({
-          moodScore: [data.mood_score],
-          stressLevel: [data.stress_level],
+          moodScore: [data.mood],
+          stressLevel: [data.stress],
           sleepHours: data.sleep_hours,
           exerciseMinutes: data.exercise_minutes,
-          cravingIntensity: [data.craving_intensity],
+          cravingIntensity: [data.cravings],
           notes: data.notes || "",
           triggers: data.triggers || [],
           copingStrategies: data.coping_strategies || []
@@ -106,12 +106,12 @@ const DailyCheckIn = () => {
       const today = new Date().toISOString().split('T')[0];
       const checkInData = {
         user_id: user.id,
-        check_in_date: today,
-        mood_score: formData.moodScore[0],
-        stress_level: formData.stressLevel[0],
+        date: today,
+        mood: formData.moodScore[0],
+        stress: formData.stressLevel[0],
         sleep_hours: formData.sleepHours,
         exercise_minutes: formData.exerciseMinutes,
-        craving_intensity: formData.cravingIntensity[0],
+        cravings: formData.cravingIntensity[0],
         notes: formData.notes,
         triggers: formData.triggers,
         coping_strategies: formData.copingStrategies

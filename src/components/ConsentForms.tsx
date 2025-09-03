@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, FileText, Users, CheckCircle, Clock, X, Loader2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, ConsentForm } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const ConsentForms = () => {
@@ -15,7 +15,7 @@ const ConsentForms = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [forms, setForms] = useState<ConsentForm[]>([]);
+  const [forms, setForms] = useState<any[]>([]);
   const [showNewForm, setShowNewForm] = useState(false);
 
   const [formData, setFormData] = useState({

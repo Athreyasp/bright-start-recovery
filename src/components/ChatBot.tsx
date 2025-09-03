@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Bot, Send, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 
 const ChatBot = () => {
   const { user } = useAuth();
@@ -52,7 +52,7 @@ const ChatBot = () => {
       await supabase.from('chat_messages').insert({
         user_id: user.id,
         message: input,
-        is_user_message: true
+        is_user: true
       });
     } catch (error) {
       console.error('Error saving message:', error);

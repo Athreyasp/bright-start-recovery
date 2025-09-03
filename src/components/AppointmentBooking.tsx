@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ArrowLeft, Calendar as CalendarIcon, Clock, User, Loader2, Plus } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, Appointment } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -20,7 +20,7 @@ const AppointmentBooking = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
@@ -87,13 +87,12 @@ const AppointmentBooking = () => {
     setSaving(true);
     
     try {
-      const appointmentDateTime = `${formData.appointmentDate}T${formData.appointmentTime}:00`;
-      
       const { error } = await supabase.from('appointments').insert({
         user_id: user.id,
         provider_type: formData.providerType,
         provider_name: formData.providerName || null,
-        appointment_date: appointmentDateTime,
+        appointment_date: formData.appointmentDate,
+        appointment_time: formData.appointmentTime,
         duration_minutes: formData.durationMinutes,
         notes: formData.notes || null,
         status: 'scheduled'

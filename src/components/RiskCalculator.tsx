@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, RiskAssessment } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const RiskCalculator = () => {
@@ -51,18 +51,19 @@ const RiskCalculator = () => {
 
       if (data && data.length > 0) {
         const assessment = data[0];
+        const responses = assessment.responses as any;
         setFormData({
-          yearsOfUse: assessment.years_of_use,
-          substanceType: assessment.substance_type,
-          frequency: assessment.frequency,
-          stressLevel: [assessment.stress_level],
-          sleepQuality: [assessment.sleep_quality],
-          supportSystem: assessment.support_system,
-          lastRelapse: assessment.last_relapse,
+          yearsOfUse: responses.yearsOfUse || 0,
+          substanceType: responses.substanceType || '',
+          frequency: responses.frequency || '',
+          stressLevel: [responses.stressLevel || 5],
+          sleepQuality: [responses.sleepQuality || 5],
+          supportSystem: responses.supportSystem || '',
+          lastRelapse: responses.lastRelapse || '',
         });
-        setRiskScore(assessment.risk_score);
-        setRecommendations(assessment.recommendations || []);
-        if (assessment.risk_score !== null) {
+        setRiskScore(assessment.score);
+        setRecommendations(responses.recommendations || []);
+        if (assessment.score !== null) {
           setShowResults(true);
         }
       }
@@ -110,17 +111,21 @@ const RiskCalculator = () => {
     
     // Save to database
     try {
+      const responseData = {
+        yearsOfUse: formData.yearsOfUse,
+        substanceType: formData.substanceType,
+        frequency: formData.frequency,
+        stressLevel: formData.stressLevel[0],
+        sleepQuality: formData.sleepQuality[0],
+        supportSystem: formData.supportSystem,
+        lastRelapse: formData.lastRelapse,
+        recommendations: recs
+      };
+
       const { error } = await supabase.from('risk_assessments').insert({
         user_id: user.id,
-        years_of_use: formData.yearsOfUse,
-        substance_type: formData.substanceType,
-        frequency: formData.frequency,
-        stress_level: formData.stressLevel[0],
-        sleep_quality: formData.sleepQuality[0],
-        support_system: formData.supportSystem,
-        last_relapse: formData.lastRelapse,
-        risk_score: finalScore,
-        recommendations: recs
+        score: finalScore,
+        responses: responseData
       });
 
       if (error) throw error;

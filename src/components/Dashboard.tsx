@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, RiskAssessment, DailyCheckIn } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [riskScore, setRiskScore] = useState<number | null>(null);
-  const [todayCheckIn, setTodayCheckIn] = useState<DailyCheckIn | null>(null);
+  const [todayCheckIn, setTodayCheckIn] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,14 +28,14 @@ const Dashboard = () => {
       // Fetch latest risk assessment
       const { data: riskData } = await supabase
         .from('risk_assessments')
-        .select('risk_score')
+        .select('score')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
       if (riskData) {
-        setRiskScore(riskData.risk_score);
+        setRiskScore(riskData.score);
       }
 
       // Check if user has done today's check-in
@@ -44,7 +44,7 @@ const Dashboard = () => {
         .from('daily_check_ins')
         .select('*')
         .eq('user_id', user.id)
-        .eq('check_in_date', today)
+        .eq('date', today)
         .single();
 
       setTodayCheckIn(checkInData);
@@ -157,7 +157,7 @@ const Dashboard = () => {
       <header className="bg-card border-b px-4 py-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="text-2xl font-bold text-primary">RecoveryPath</Link>
+            <Link to="/" className="text-2xl font-bold text-primary">QuitBuddy</Link>
           </div>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" className="relative">
