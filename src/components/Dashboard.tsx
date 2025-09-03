@@ -25,29 +25,33 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
-      // Fetch latest risk assessment
-      const { data: riskData } = await supabase
-        .from('risk_assessments')
-        .select('score')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      // Fetch both queries in parallel for better performance
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [riskResult, checkInResult] = await Promise.all([
+        // Fetch latest risk assessment
+        supabase
+          .from('risk_assessments')
+          .select('score')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        
+        // Check if user has done today's check-in
+        supabase
+          .from('daily_check_ins')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('date', today)
+          .maybeSingle()
+      ]);
 
-      if (riskData) {
-        setRiskScore(riskData.score);
+      if (riskResult.data) {
+        setRiskScore(riskResult.data.score);
       }
 
-      // Check if user has done today's check-in
-      const today = new Date().toISOString().split('T')[0];
-      const { data: checkInData } = await supabase
-        .from('daily_check_ins')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .single();
-
-      setTodayCheckIn(checkInData);
+      setTodayCheckIn(checkInResult.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
