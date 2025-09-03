@@ -14,7 +14,216 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          provider_name: string
+          provider_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          provider_name: string
+          provider_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          provider_name?: string
+          provider_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_user: boolean
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_user: boolean
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_user?: boolean
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      consent_forms: {
+        Row: {
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          form_type: string
+          id: string
+          signed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          form_type: string
+          id?: string
+          signed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          form_type?: string
+          id?: string
+          signed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_check_ins: {
+        Row: {
+          coping_strategies: string[] | null
+          cravings: number | null
+          created_at: string
+          date: string
+          exercise_minutes: number | null
+          id: string
+          mood: number | null
+          notes: string | null
+          sleep_hours: number | null
+          stress: number | null
+          triggers: string[] | null
+          user_id: string
+        }
+        Insert: {
+          coping_strategies?: string[] | null
+          cravings?: number | null
+          created_at?: string
+          date?: string
+          exercise_minutes?: number | null
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          sleep_hours?: number | null
+          stress?: number | null
+          triggers?: string[] | null
+          user_id: string
+        }
+        Update: {
+          coping_strategies?: string[] | null
+          cravings?: number | null
+          created_at?: string
+          date?: string
+          exercise_minutes?: number | null
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          sleep_hours?: number | null
+          stress?: number | null
+          triggers?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          recovery_start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          recovery_start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          recovery_start_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      risk_assessments: {
+        Row: {
+          created_at: string
+          id: string
+          responses: Json
+          score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          responses: Json
+          score: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          responses?: Json
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
