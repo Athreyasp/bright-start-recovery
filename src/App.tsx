@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AuthForm } from "@/components/auth/AuthForm";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import RiskCalculator from "./components/RiskCalculator";
@@ -57,6 +58,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/auth" element={<AuthForm />} />
+            <Route path="/dashboard/profile" element={
               <ProtectedRoute>
                 <UserProfile />
               </ProtectedRoute>
