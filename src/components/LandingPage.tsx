@@ -9,7 +9,7 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background font-poppins">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <div className="text-2xl font-bold text-primary">RecoveryPath</div>
+        <div className="text-2xl font-bold text-primary">QuitBuddy</div>
         <div className="hidden md:flex space-x-8">
           <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Features</a>
           <a href="#testimonials" className="text-muted-foreground hover:text-primary transition-colors">Stories</a>
@@ -193,7 +193,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="text-2xl font-bold text-primary mb-4">RecoveryPath</div>
+              <div className="text-2xl font-bold text-primary mb-4">QuitBuddy</div>
               <p className="text-muted-foreground">
                 Supporting your journey to recovery with compassion, technology, and community.
               </p>
@@ -230,7 +230,7 @@ const LandingPage = () => {
           </div>
           
           <div className="border-t mt-12 pt-8 text-center text-muted-foreground">
-            © 2024 RecoveryPath. All rights reserved. Licensed healthcare technology platform.
+            © 2024 QuitBuddy. All rights reserved. Licensed healthcare technology platform.
           </div>
         </div>
       </footer>
