@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
@@ -14,6 +15,10 @@ const Dashboard = () => {
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [todayCheckIn, setTodayCheckIn] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [weeklyCheckIns, setWeeklyCheckIns] = useState<number>(0);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [streakDays, setStreakDays] = useState<number>(0);
+  const [totalCheckIns, setTotalCheckIns] = useState<number>(0);
 
   useEffect(() => {
     if (user) {
@@ -25,10 +30,17 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
-      // Fetch both queries in parallel for better performance
       const today = new Date().toISOString().split('T')[0];
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
-      const [riskResult, checkInResult] = await Promise.all([
+      const [
+        riskResult, 
+        checkInResult, 
+        weeklyCheckInsResult, 
+        appointmentsResult,
+        totalCheckInsResult,
+        streakResult
+      ] = await Promise.all([
         // Fetch latest risk assessment
         supabase
           .from('risk_assessments')
@@ -44,7 +56,37 @@ const Dashboard = () => {
           .select('*')
           .eq('user_id', user.id)
           .eq('date', today)
-          .maybeSingle()
+          .maybeSingle(),
+
+        // Get weekly check-ins count
+        supabase
+          .from('daily_check_ins')
+          .select('date')
+          .eq('user_id', user.id)
+          .gte('date', weekAgo),
+
+        // Get upcoming appointments
+        supabase
+          .from('appointments')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('appointment_date', today)
+          .order('appointment_date', { ascending: true })
+          .limit(3),
+
+        // Get total check-ins
+        supabase
+          .from('daily_check_ins')
+          .select('date')
+          .eq('user_id', user.id),
+
+        // Calculate streak (consecutive check-ins)
+        supabase
+          .from('daily_check_ins')
+          .select('date')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false })
+          .limit(30)
       ]);
 
       if (riskResult.data) {
@@ -52,6 +94,30 @@ const Dashboard = () => {
       }
 
       setTodayCheckIn(checkInResult.data);
+      setWeeklyCheckIns(weeklyCheckInsResult.data?.length || 0);
+      setUpcomingAppointments(appointmentsResult.data || []);
+      setTotalCheckIns(totalCheckInsResult.data?.length || 0);
+
+      // Calculate streak
+      if (streakResult.data && streakResult.data.length > 0) {
+        let streak = 0;
+        const dates = streakResult.data.map(item => item.date).sort().reverse();
+        const todayDate = new Date();
+        
+        for (let i = 0; i < dates.length; i++) {
+          const checkDate = new Date(dates[i]);
+          const expectedDate = new Date(todayDate);
+          expectedDate.setDate(todayDate.getDate() - i);
+          
+          if (checkDate.toDateString() === expectedDate.toDateString()) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        setStreakDays(streak);
+      }
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -212,6 +278,65 @@ const Dashboard = () => {
           </Card>
         )}
 
+        {/* Progress Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <Target className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Current Streak</h3>
+              </div>
+              <div className="text-3xl font-bold text-primary">{streakDays}</div>
+              <p className="text-sm text-muted-foreground">consecutive days</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-success" />
+                <h3 className="font-semibold">This Week</h3>
+              </div>
+              <div className="text-3xl font-bold text-success">{weeklyCheckIns}/7</div>
+              <p className="text-sm text-muted-foreground">check-ins completed</p>
+              <Progress value={(weeklyCheckIns / 7) * 100} className="mt-2" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <CheckCircle className="w-5 h-5 text-accent" />
+                <h3 className="font-semibold">Total Check-ins</h3>
+              </div>
+              <div className="text-3xl font-bold text-accent">{totalCheckIns}</div>
+              <p className="text-sm text-muted-foreground">since you started</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <Clock className="w-5 h-5 text-warning" />
+                <h3 className="font-semibold">Next Appointment</h3>
+              </div>
+              {upcomingAppointments.length > 0 ? (
+                <>
+                  <div className="text-lg font-bold text-warning">
+                    {new Date(upcomingAppointments[0].appointment_date).toLocaleDateString()}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{upcomingAppointments[0].provider_name}</p>
+                </>
+              ) : (
+                <>
+                  <div className="text-lg font-bold text-muted-foreground">None</div>
+                  <p className="text-sm text-muted-foreground">No upcoming appointments</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {modules.map((module) => (
@@ -268,6 +393,75 @@ const Dashboard = () => {
             </Link>
           ))}
         </div>
+
+        {/* Recent Activity & Upcoming */}
+        {(upcomingAppointments.length > 0 || todayCheckIn) && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Recent Activity & Upcoming</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Recent Check-in */}
+              {todayCheckIn && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-success" />
+                      <span>Today's Check-in</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Mood:</span>
+                        <span className="font-medium">{todayCheckIn.mood ? `${todayCheckIn.mood}/10` : 'Not logged'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Stress:</span>
+                        <span className="font-medium">{todayCheckIn.stress ? `${todayCheckIn.stress}/10` : 'Not logged'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Sleep:</span>
+                        <span className="font-medium">{todayCheckIn.sleep_hours ? `${todayCheckIn.sleep_hours}h` : 'Not logged'}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Upcoming Appointments */}
+              {upcomingAppointments.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <span>Upcoming Appointments</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {upcomingAppointments.slice(0, 3).map((appointment) => (
+                        <div key={appointment.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <div className="font-medium">{appointment.provider_name}</div>
+                            <div className="text-sm text-muted-foreground">{appointment.provider_type}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">
+                              {new Date(appointment.appointment_date).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {appointment.appointment_time}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mt-12">
