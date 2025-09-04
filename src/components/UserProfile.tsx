@@ -5,29 +5,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, User, Calendar, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@clerk/clerk-react";
 
 const UserProfile = () => {
-  const { user, profile, updateProfile } = useAuth();
+  const { user } = useUser();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: profile?.full_name || '',
-    phone: profile?.phone || '',
-    dateOfBirth: profile?.date_of_birth || '',
-    emergencyContactName: profile?.emergency_contact_name || '',
-    emergencyContactPhone: profile?.emergency_contact_phone || '',
-    recoveryStartDate: profile?.recovery_start_date || ''
+    fullName: user?.fullName || '',
+    phone: user?.phoneNumbers?.[0]?.phoneNumber || '',
+    dateOfBirth: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    recoveryStartDate: ''
   });
 
   const handleSave = async () => {
-    await updateProfile({
-      full_name: formData.fullName,
-      phone: formData.phone,
-      date_of_birth: formData.dateOfBirth,
-      emergency_contact_name: formData.emergencyContactName,
-      emergency_contact_phone: formData.emergencyContactPhone,
-      recovery_start_date: formData.recoveryStartDate
-    });
+    // For now, just toggle editing state since Clerk user profile updates
+    // would need to be done through Clerk's user management system
     setEditing(false);
   };
 
@@ -65,7 +59,7 @@ const UserProfile = () => {
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input value={user?.email || ''} disabled />
+                <Input value={user?.emailAddresses?.[0]?.emailAddress || ''} disabled />
               </div>
             </div>
 

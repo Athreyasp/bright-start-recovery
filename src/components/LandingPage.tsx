@@ -1,3 +1,4 @@
+import { SignInButton, SignUpButton, SignedOut } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Users, Calculator, ChevronLeft, ChevronRight } from "lucide-react";
@@ -32,16 +33,18 @@ const LandingPage = () => {
                 and a community that understands. Every step forward matters.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/auth">
-                  <Button size="lg" variant="hero" className="text-lg px-8 py-4">
-                    Join Now
-                  </Button>
-                </Link>
-                <Link to="/auth">
-                  <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
-                    Login
-                  </Button>
-                </Link>
+                <SignedOut>
+                  <SignUpButton forceRedirectUrl="/dashboard">
+                    <Button size="lg" variant="hero" className="text-lg px-8 py-4">
+                      Join Now
+                    </Button>
+                  </SignUpButton>
+                  <SignInButton forceRedirectUrl="/dashboard">
+                    <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
+                      Login
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
               </div>
             </div>
             <div className="relative">
@@ -181,9 +184,11 @@ const LandingPage = () => {
             Join thousands who have transformed their lives with personalized support and proven strategies.
           </p>
           <Button variant="secondary" size="lg" className="text-lg px-8 py-4">
-            <Link to="/auth" className="text-inherit no-underline">
-              Start My Journey
-            </Link>
+            <SignedOut>
+              <SignUpButton forceRedirectUrl="/dashboard">
+                Start My Journey
+              </SignUpButton>
+            </SignedOut>
           </Button>
         </div>
       </section>

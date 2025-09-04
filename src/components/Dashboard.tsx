@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUser, SignOutButton, UserButton } from "@clerk/clerk-react";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user } = useUser();
   const { toast } = useToast();
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [todayCheckIn, setTodayCheckIn] = useState<any | null>(null);
@@ -206,9 +206,6 @@ const Dashboard = () => {
     }
   ];
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   if (loading) {
     return (
@@ -237,14 +234,9 @@ const Dashboard = () => {
               )}
             </Button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-primary" />
-              </div>
-              <span className="font-medium">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</span>
+              <UserButton />
+              <span className="font-medium">Welcome, {user?.fullName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0]}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4" />
-            </Button>
           </div>
         </div>
       </header>
@@ -252,7 +244,7 @@ const Dashboard = () => {
       {/* Main Dashboard */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.full_name || 'friend'}</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {user?.fullName || 'friend'}</h1>
           <p className="text-muted-foreground">Here's your recovery dashboard. You're doing great - keep it up!</p>
         </div>
 
