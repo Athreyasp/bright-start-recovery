@@ -223,6 +223,18 @@ All colors MUST be HSL.
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
   }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-muted {
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  
+  .scrollbar-track-transparent {
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
 }
 
 /* Keyframe animations */

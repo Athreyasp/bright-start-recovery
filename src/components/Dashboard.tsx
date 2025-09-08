@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target, Award, Zap, Star, Trophy, ShieldCheck, BarChart3 } from "lucide-react";
+import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target, Award, Zap, Star, Trophy, ShieldCheck, BarChart3, ArrowRight, Flame, CalendarDays, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
@@ -287,29 +287,37 @@ const Dashboard = () => {
 
         {/* Enhanced Daily Check-in Alert */}
         {!todayCheckIn && (
-          <Card className="mb-8 dashboard-card border-warning/50 bg-gradient-to-r from-warning/10 to-warning/5 shimmer-effect">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className="mb-8 dashboard-card border-primary/30 bg-gradient-to-r from-primary/15 to-primary/5 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-50"></div>
+            <CardContent className="p-6 relative z-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-warning to-warning/70 rounded-xl flex items-center justify-center pulse-ring floating-animation">
-                    <Heart className="w-6 h-6 text-white" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center pulse-ring floating-animation shadow-lg">
+                    <Heart className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg flex items-center">
-                      Don't forget your daily check-in! 
-                      <Zap className="w-4 h-4 ml-2 text-warning" />
+                    <h3 className="font-bold text-xl flex items-center text-primary mb-2">
+                      Ready for your daily check-in? 
+                      <Zap className="w-5 h-5 ml-2 text-primary animate-pulse" />
                     </h3>
-                    <p className="text-sm text-muted-foreground">How are you feeling today? Track your mood and progress.</p>
-                    <div className="flex items-center mt-2 space-x-2">
-                      <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
-                      <span className="text-xs text-warning font-medium">Action required</span>
+                    <p className="text-muted-foreground mb-2">Take a moment to reflect on how you're feeling today and track your progress.</p>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                        <span className="text-sm text-primary font-medium">Action needed</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Takes 2 minutes</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <Link to="/dashboard/daily-checkin">
-                  <Button className="scale-on-hover shimmer-effect">
-                    <CheckCircle className="w-4 h-4 mr-2" />
+                  <Button size="lg" className="scale-on-hover bg-primary hover:bg-primary/90 px-8 py-3 text-base font-semibold shadow-lg">
+                    <CheckCircle className="w-5 h-5 mr-2" />
                     Complete Check-in
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -402,87 +410,73 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Enhanced Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {modules.map((module, index) => (
-            <Link key={module.title} to={module.href}>
-              <Card className={`dashboard-card group cursor-pointer h-full relative overflow-hidden ${
-                module.special ? 'bg-gradient-to-br from-primary/10 to-accent/10' : ''
-              }`} style={{animationDelay: `${index * 100}ms`}}>
-                <CardHeader className="pb-3 relative z-10">
-                  <div className={`w-14 h-14 bg-gradient-to-br ${module.bgColor.replace('bg-', 'from-')} to-transparent rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shimmer-effect`}>
-                    <module.icon className={`w-7 h-7 ${module.color} drop-shadow-lg`} />
-                  </div>
-                  <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
-                    {module.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
+        {/* Enhanced Dashboard Grid with New Layout */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold gradient-text">Recovery Tools</h2>
+            <p className="text-muted-foreground">Everything you need for your journey</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {modules.map((module, index) => (
+              <Link key={module.title} to={module.href}>
+                <Card className={`dashboard-card group cursor-pointer h-full relative overflow-hidden transition-all duration-300 hover:shadow-2xl border-border/50 ${
+                  module.special ? 'border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5' : ''
+                }`} style={{animationDelay: `${index * 50}ms`}}>
                   
-                  {module.special && module.riskScore !== null && (
-                    <div className="space-y-4">
-                      <div className={`flex items-center justify-between p-4 rounded-xl border glass-morphism ${getRiskBgColor(module.riskScore)}`}>
-                        <span className="text-sm font-medium">Risk Score</span>
-                        <span className={`text-3xl font-bold ${getRiskColor(module.riskScore)} drop-shadow-sm`}>
-                          {module.riskScore}%
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex-1 bg-muted rounded-full h-3 overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-1000 shimmer-effect ${
-                                module.riskScore <= 30 ? 'bg-gradient-to-r from-success to-success/70' : 
-                                module.riskScore <= 70 ? 'bg-gradient-to-r from-warning to-warning/70' : 'bg-gradient-to-r from-destructive to-destructive/70'
-                              }`}
-                              style={{ width: `${module.riskScore}%` }}
-                            />
-                          </div>
-                          <ShieldCheck className={`w-4 h-4 ${getRiskColor(module.riskScore)}`} />
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className={`text-xs font-medium ${getRiskColor(module.riskScore)}`}>
-                            {module.riskScore <= 30 ? '🟢 Low Risk' : module.riskScore <= 70 ? '🟡 Moderate Risk' : '🔴 High Risk'}
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <CardContent className="p-6 text-center relative z-10">
+                    <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${module.bgColor.replace('bg-', 'from-')} to-transparent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                      <module.icon className={`w-8 h-8 ${module.color} drop-shadow-lg`} />
+                    </div>
+                    
+                    <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                      {module.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-4">{module.description}</p>
+                    
+                    {/* Special features for specific modules */}
+                    {module.special && module.riskScore !== null && (
+                      <div className={`p-3 rounded-xl border ${getRiskBgColor(module.riskScore)} mb-4`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Current Risk</span>
+                          <span className={`text-lg font-bold ${getRiskColor(module.riskScore)}`}>
+                            {module.riskScore}%
                           </span>
-                          <Button variant="outline" size="sm" className="scale-on-hover">
-                            View Details
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {module.special && module.riskScore === null && (
-                    <div className="text-center p-6 border-2 border-dashed border-muted rounded-xl glass-morphism">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-3 pulse-ring">
-                        <Calculator className="w-6 h-6 text-white" />
+                    )}
+                    
+                    {module.special && module.riskScore === null && (
+                      <div className="text-center p-4 border-2 border-dashed border-muted rounded-xl mb-4">
+                        <Calculator className="w-8 h-8 text-primary mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground mb-2">Take your first assessment</p>
+                        <Button variant="outline" size="sm" className="scale-on-hover">
+                          Start Now
+                        </Button>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">No assessment yet</p>
-                      <Button variant="outline" size="sm" className="scale-on-hover shimmer-effect">
-                        Take Assessment
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {!module.special && (
-                    <div className="space-y-3">
-                      <Button variant="ghost" size="sm" className="w-full justify-between p-0 h-auto text-primary hover:text-primary/80 group-hover:translate-x-1 transition-transform">
-                        <span>Access Now</span>
-                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          →
+                    )}
+                    
+                    {module.title === "AI Chatbot" && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-center space-x-2 text-xs">
+                          <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                          <span className="text-success font-medium">Available 24/7</span>
                         </div>
-                      </Button>
-                      <div className="h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent rounded-full"></div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="mr-2">Access now</span>
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </div>
-                  )}
-                </CardContent>
-                
-                {/* Decorative gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </Card>
-            </Link>
-          ))}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Recent Activity & Upcoming */}
