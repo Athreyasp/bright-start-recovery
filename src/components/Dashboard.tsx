@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target } from "lucide-react";
+import { Bell, Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, Users, Stethoscope, MessageCircle, LogOut, TrendingUp, Clock, CheckCircle, Target, Award, Zap, Star, Trophy, ShieldCheck, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
@@ -222,173 +222,264 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background font-poppins">
-      {/* Header */}
-      <header className="bg-card border-b px-4 py-4">
+    <div className="min-h-screen bg-dashboard font-poppins">
+      {/* Enhanced Header with Glass Morphism */}
+      <header className="glass-morphism border-b border-white/20 px-4 py-4 sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="text-2xl font-bold text-primary">QuitBuddy</Link>
+            <Link to="/" className="text-2xl font-bold gradient-text floating-animation">
+              QuitBuddy
+            </Link>
+            <Badge variant="secondary" className="shimmer-effect">
+              <Trophy className="w-3 h-3 mr-1" />
+              Recovery Platform
+            </Badge>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative">
+            <Button variant="ghost" size="sm" className="relative pulse-ring scale-on-hover">
               <Bell className="w-5 h-5" />
               {!todayCheckIn && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">1</Badge>
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs animate-pulse">1</Badge>
               )}
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-primary" />
+            <div className="flex items-center space-x-3 glass-morphism px-3 py-2 rounded-full">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center pulse-ring">
+                <User className="w-4 h-4 text-white" />
               </div>
               <span className="font-medium">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</span>
+              <div className="flex space-x-1">
+                <Star className="w-4 h-4 text-warning fill-current" />
+                <Star className="w-4 h-4 text-warning fill-current" />
+                <Star className="w-4 h-4 text-warning fill-current" />
+              </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="scale-on-hover">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main Dashboard */}
+      {/* Enhanced Main Dashboard */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.full_name || 'friend'}</h1>
-          <p className="text-muted-foreground">Here's your recovery dashboard. You're doing great - keep it up!</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold gradient-text mb-3 floating-animation">
+            Welcome back, {profile?.full_name || 'friend'}! 
+          </h1>
+          <p className="text-muted-foreground text-lg mb-4">
+            Here's your recovery dashboard. You're doing great - keep it up! 🌟
+          </p>
+          <div className="flex justify-center space-x-4 mb-6">
+            <Badge variant="outline" className="glass-morphism scale-on-hover">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Recovery Strong
+            </Badge>
+            <Badge variant="outline" className="glass-morphism scale-on-hover">
+              <Award className="w-4 h-4 mr-2" />
+              {streakDays} Day Streak
+            </Badge>
+            <Badge variant="outline" className="glass-morphism scale-on-hover">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              {totalCheckIns} Total Check-ins
+            </Badge>
+          </div>
         </div>
 
-        {/* Alert for daily check-in */}
+        {/* Enhanced Daily Check-in Alert */}
         {!todayCheckIn && (
-          <Card className="mb-8 border-warning/50 bg-warning/5">
+          <Card className="mb-8 dashboard-card border-warning/50 bg-gradient-to-r from-warning/10 to-warning/5 shimmer-effect">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-warning/20 rounded-full flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-warning" />
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-warning to-warning/70 rounded-xl flex items-center justify-center pulse-ring floating-animation">
+                    <Heart className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Don't forget your daily check-in!</h3>
+                    <h3 className="font-semibold text-lg flex items-center">
+                      Don't forget your daily check-in! 
+                      <Zap className="w-4 h-4 ml-2 text-warning" />
+                    </h3>
                     <p className="text-sm text-muted-foreground">How are you feeling today? Track your mood and progress.</p>
+                    <div className="flex items-center mt-2 space-x-2">
+                      <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
+                      <span className="text-xs text-warning font-medium">Action required</span>
+                    </div>
                   </div>
                 </div>
                 <Link to="/dashboard/daily-checkin">
-                  <Button>Complete Check-in</Button>
+                  <Button className="scale-on-hover shimmer-effect">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Complete Check-in
+                  </Button>
                 </Link>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Progress Overview */}
+        {/* Enhanced Progress Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="dashboard-card bg-gradient-to-br from-primary/10 to-primary/5">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <Target className="w-5 h-5 text-primary" />
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
                 <h3 className="font-semibold">Current Streak</h3>
               </div>
-              <div className="text-3xl font-bold text-primary">{streakDays}</div>
+              <div className="text-4xl font-bold gradient-text mb-1">{streakDays}</div>
               <p className="text-sm text-muted-foreground">consecutive days</p>
+              <div className="mt-3 h-1 bg-primary/20 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-primary to-accent rounded-full animate-pulse" style={{width: '75%'}}></div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card bg-gradient-to-br from-success/10 to-success/5">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-success" />
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-success to-success/70 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-white" />
+                </div>
                 <h3 className="font-semibold">This Week</h3>
               </div>
-              <div className="text-3xl font-bold text-success">{weeklyCheckIns}/7</div>
+              <div className="text-4xl font-bold text-success mb-1">{weeklyCheckIns}/7</div>
               <p className="text-sm text-muted-foreground">check-ins completed</p>
-              <Progress value={(weeklyCheckIns / 7) * 100} className="mt-2" />
+              <Progress value={(weeklyCheckIns / 7) * 100} className="mt-3 shimmer-effect" />
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card bg-gradient-to-br from-accent/10 to-accent/5">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <CheckCircle className="w-5 h-5 text-accent" />
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent/70 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
                 <h3 className="font-semibold">Total Check-ins</h3>
               </div>
-              <div className="text-3xl font-bold text-accent">{totalCheckIns}</div>
+              <div className="text-4xl font-bold text-accent mb-1">{totalCheckIns}</div>
               <p className="text-sm text-muted-foreground">since you started</p>
+              {totalCheckIns > 0 && (
+                <div className="flex items-center mt-3 space-x-1">
+                  <Trophy className="w-4 h-4 text-accent" />
+                  <span className="text-xs text-accent font-medium">Milestone achieved!</span>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card bg-gradient-to-br from-warning/10 to-warning/5">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <Clock className="w-5 h-5 text-warning" />
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-warning to-warning/70 rounded-lg flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
                 <h3 className="font-semibold">Next Appointment</h3>
               </div>
               {upcomingAppointments.length > 0 ? (
                 <>
-                  <div className="text-lg font-bold text-warning">
+                  <div className="text-lg font-bold text-warning mb-1">
                     {new Date(upcomingAppointments[0].appointment_date).toLocaleDateString()}
                   </div>
                   <p className="text-sm text-muted-foreground">{upcomingAppointments[0].provider_name}</p>
+                  <div className="flex items-center mt-3 space-x-1">
+                    <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
+                    <span className="text-xs text-warning font-medium">Upcoming</span>
+                  </div>
                 </>
               ) : (
                 <>
-                  <div className="text-lg font-bold text-muted-foreground">None</div>
+                  <div className="text-lg font-bold text-muted-foreground mb-1">None</div>
                   <p className="text-sm text-muted-foreground">No upcoming appointments</p>
+                  <Link to="/dashboard/appointments">
+                    <Button variant="outline" size="sm" className="mt-3 scale-on-hover">
+                      Schedule Now
+                    </Button>
+                  </Link>
                 </>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Dashboard Grid */}
+        {/* Enhanced Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {modules.map((module) => (
+          {modules.map((module, index) => (
             <Link key={module.title} to={module.href}>
-              <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
-                <CardHeader className="pb-3">
-                  <div className={`w-12 h-12 ${module.bgColor} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                    <module.icon className={`w-6 h-6 ${module.color}`} />
+              <Card className={`dashboard-card group cursor-pointer h-full relative overflow-hidden ${
+                module.special ? 'bg-gradient-to-br from-primary/10 to-accent/10' : ''
+              }`} style={{animationDelay: `${index * 100}ms`}}>
+                <CardHeader className="pb-3 relative z-10">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${module.bgColor.replace('bg-', 'from-')} to-transparent rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shimmer-effect`}>
+                    <module.icon className={`w-7 h-7 ${module.color} drop-shadow-lg`} />
                   </div>
-                  <CardTitle className="text-lg font-semibold">{module.title}</CardTitle>
+                  <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
+                    {module.title}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative z-10">
                   <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
                   
                   {module.special && module.riskScore !== null && (
-                    <div className="space-y-3">
-                      <div className={`flex items-center justify-between p-3 rounded-lg border ${getRiskBgColor(module.riskScore)}`}>
-                        <span className="text-sm font-medium">Current Risk Score</span>
-                        <span className={`text-2xl font-bold ${getRiskColor(module.riskScore)}`}>
+                    <div className="space-y-4">
+                      <div className={`flex items-center justify-between p-4 rounded-xl border glass-morphism ${getRiskBgColor(module.riskScore)}`}>
+                        <span className="text-sm font-medium">Risk Score</span>
+                        <span className={`text-3xl font-bold ${getRiskColor(module.riskScore)} drop-shadow-sm`}>
                           {module.riskScore}%
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-muted rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-500 ${
-                              module.riskScore <= 30 ? 'bg-success' : 
-                              module.riskScore <= 70 ? 'bg-warning' : 'bg-destructive'
-                            }`}
-                            style={{ width: `${module.riskScore}%` }}
-                          />
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1 bg-muted rounded-full h-3 overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-1000 shimmer-effect ${
+                                module.riskScore <= 30 ? 'bg-gradient-to-r from-success to-success/70' : 
+                                module.riskScore <= 70 ? 'bg-gradient-to-r from-warning to-warning/70' : 'bg-gradient-to-r from-destructive to-destructive/70'
+                              }`}
+                              style={{ width: `${module.riskScore}%` }}
+                            />
+                          </div>
+                          <ShieldCheck className={`w-4 h-4 ${getRiskColor(module.riskScore)}`} />
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {module.riskScore <= 30 ? 'Low Risk' : module.riskScore <= 70 ? 'Moderate' : 'High Risk'}
-                        </span>
+                        <div className="flex justify-between items-center">
+                          <span className={`text-xs font-medium ${getRiskColor(module.riskScore)}`}>
+                            {module.riskScore <= 30 ? '🟢 Low Risk' : module.riskScore <= 70 ? '🟡 Moderate Risk' : '🔴 High Risk'}
+                          </span>
+                          <Button variant="outline" size="sm" className="scale-on-hover">
+                            View Details
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
 
                   {module.special && module.riskScore === null && (
-                    <div className="text-center p-4 border-2 border-dashed border-muted rounded-lg">
-                      <p className="text-sm text-muted-foreground mb-2">No assessment yet</p>
-                      <Button variant="outline" size="sm">Take Assessment</Button>
+                    <div className="text-center p-6 border-2 border-dashed border-muted rounded-xl glass-morphism">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-3 pulse-ring">
+                        <Calculator className="w-6 h-6 text-white" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">No assessment yet</p>
+                      <Button variant="outline" size="sm" className="scale-on-hover shimmer-effect">
+                        Take Assessment
+                      </Button>
                     </div>
                   )}
                   
                   {!module.special && (
-                    <Button variant="ghost" size="sm" className="w-full justify-start p-0 h-auto text-primary hover:text-primary/80">
-                      Access Now →
-                    </Button>
+                    <div className="space-y-3">
+                      <Button variant="ghost" size="sm" className="w-full justify-between p-0 h-auto text-primary hover:text-primary/80 group-hover:translate-x-1 transition-transform">
+                        <span>Access Now</span>
+                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                          →
+                        </div>
+                      </Button>
+                      <div className="h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent rounded-full"></div>
+                    </div>
                   )}
                 </CardContent>
+                
+                {/* Decorative gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Card>
             </Link>
           ))}
