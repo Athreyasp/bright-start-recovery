@@ -88,6 +88,8 @@ export type Database = {
           created_at: string
           form_type: string
           id: string
+          relationship: string | null
+          signature_data: string | null
           signed_at: string | null
           status: string
           user_id: string
@@ -99,6 +101,8 @@ export type Database = {
           created_at?: string
           form_type: string
           id?: string
+          relationship?: string | null
+          signature_data?: string | null
           signed_at?: string | null
           status?: string
           user_id: string
@@ -110,6 +114,8 @@ export type Database = {
           created_at?: string
           form_type?: string
           id?: string
+          relationship?: string | null
+          signature_data?: string | null
           signed_at?: string | null
           status?: string
           user_id?: string
