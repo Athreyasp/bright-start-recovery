@@ -222,46 +222,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dashboard font-poppins">
-      {/* Enhanced Header with Glass Morphism */}
-      <header className="glass-morphism border-b border-white/20 px-4 py-4 sticky top-0 z-50">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="text-2xl font-bold gradient-text floating-animation">
-              QuitBuddy
-            </Link>
-            <Badge variant="secondary" className="shimmer-effect">
-              <Trophy className="w-3 h-3 mr-1" />
-              Recovery Platform
-            </Badge>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative pulse-ring scale-on-hover">
-              <Bell className="w-5 h-5" />
-              {!todayCheckIn && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs animate-pulse">1</Badge>
-              )}
-            </Button>
-            <div className="flex items-center space-x-3 glass-morphism px-3 py-2 rounded-full">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center pulse-ring">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-medium">Welcome, {profile?.full_name || user?.email?.split('@')[0]}</span>
-              <div className="flex space-x-1">
-                <Star className="w-4 h-4 text-warning fill-current" />
-                <Star className="w-4 h-4 text-warning fill-current" />
-                <Star className="w-4 h-4 text-warning fill-current" />
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="scale-on-hover">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Enhanced Main Dashboard */}
-      <main className="container mx-auto px-4 py-8">
+    <div className="space-y-8">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold gradient-text mb-3 floating-animation">
             Welcome back, {profile?.full_name || 'friend'}! 
@@ -607,7 +568,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 };

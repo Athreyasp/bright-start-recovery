@@ -14,6 +14,7 @@ import DailyCheckIn from "./components/DailyCheckIn";
 import ConsentForms from "./components/ConsentForms";
 import ChatBot from "./components/ChatBot";
 import UserProfile from "./components/UserProfile";
+import { DashboardLayout } from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,38 +34,52 @@ const App = () => (
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard/risk-calculator" element={
               <ProtectedRoute>
-                <RiskCalculator />
+                <DashboardLayout>
+                  <RiskCalculator />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard/appointments" element={
               <ProtectedRoute>
-                <AppointmentBooking />
+                <DashboardLayout>
+                  <AppointmentBooking />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard/daily-checkin" element={
               <ProtectedRoute>
-                <DailyCheckIn />
+                <DashboardLayout>
+                  <DailyCheckIn />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard/consent-forms" element={
               <ProtectedRoute>
-                <ConsentForms />
+                <DashboardLayout>
+                  <ConsentForms />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard/chatbot" element={
               <ProtectedRoute>
-                <ChatBot />
+                <DashboardLayout>
+                  <ChatBot />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route path="/auth" element={<AuthForm />} />
             <Route path="/dashboard/profile" element={
               <ProtectedRoute>
-                <UserProfile />
+                <DashboardLayout>
+                  <UserProfile />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
