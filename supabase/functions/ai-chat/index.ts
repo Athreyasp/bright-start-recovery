@@ -85,20 +85,25 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: context },
           { role: 'user', content: message }
         ],
-        max_completion_tokens: 300
+        max_tokens: 300,
+        temperature: 0.7
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
+      console.error('OpenAI API error status:', response.status);
+      console.error('OpenAI API error response:', errorData);
       return new Response(
-        JSON.stringify({ error: 'Failed to get AI response' }),
+        JSON.stringify({ 
+          error: 'Failed to get AI response',
+          details: `API Error ${response.status}: ${errorData}` 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
