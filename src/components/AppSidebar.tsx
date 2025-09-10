@@ -65,10 +65,10 @@ export function AppSidebar() {
 
   const getNavClass = (path: string) => {
     const active = isActive(path)
-    return `w-full justify-start transition-all duration-200 ${
+    return `w-full justify-start transition-all duration-300 rounded-xl p-3 group ${
       active 
-        ? "bg-primary text-primary-foreground shadow-md" 
-        : "hover:bg-muted/50 hover:translate-x-1"
+        ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/25 scale-105" 
+        : "hover:bg-gradient-to-r hover:from-muted/80 hover:to-muted/40 hover:scale-105 hover:shadow-lg"
     }`
   }
 
@@ -77,36 +77,44 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="w-72 transition-all duration-300 border-r border-border/40">
-      <SidebarHeader className="p-6 border-b border-border/40">
+    <Sidebar className="w-72 transition-all duration-300 border-r border-border/20 bg-background/95 backdrop-blur-xl shadow-2xl">
+      <SidebarHeader className="p-6 border-b border-border/20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-            <Heart className="w-5 h-5 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-primary via-primary/80 to-accent rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300 ring-2 ring-primary/20">
+            <Heart className="w-6 h-6 text-white drop-shadow-lg" />
           </div>
           <div>
-            <h2 className="text-xl font-bold gradient-text">QuitBuddy</h2>
-            <p className="text-xs text-muted-foreground">Recovery Platform</p>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">QuitBuddy</h2>
+            <p className="text-xs text-muted-foreground font-medium">Recovery Platform</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-4 py-6 space-y-6">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider mb-4 px-2">
             Main
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass(item.url)}>
-                      <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span className="font-medium">{item.title}</span>
-                      {isActive(item.url) && (
-                        <ChevronRight className="w-4 h-4 ml-auto" />
-                      )}
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                          isActive(item.url) 
+                            ? "bg-white/20 shadow-lg" 
+                            : "bg-transparent group-hover:bg-white/10"
+                        }`}>
+                          <item.icon className="w-4 h-4 flex-shrink-0" />
+                        </div>
+                        <span className="font-medium flex-1">{item.title}</span>
+                        {isActive(item.url) && (
+                          <ChevronRight className="w-4 h-4 opacity-70" />
+                        )}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,20 +125,28 @@ export function AppSidebar() {
 
         {/* Healthcare */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider mb-4 px-2">
             Healthcare
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {healthcareItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass(item.url)}>
-                      <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span className="font-medium">{item.title}</span>
-                      {isActive(item.url) && (
-                        <ChevronRight className="w-4 h-4 ml-auto" />
-                      )}
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                          isActive(item.url) 
+                            ? "bg-white/20 shadow-lg" 
+                            : "bg-transparent group-hover:bg-white/10"
+                        }`}>
+                          <item.icon className="w-4 h-4 flex-shrink-0" />
+                        </div>
+                        <span className="font-medium flex-1">{item.title}</span>
+                        {isActive(item.url) && (
+                          <ChevronRight className="w-4 h-4 opacity-70" />
+                        )}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -141,20 +157,28 @@ export function AppSidebar() {
 
         {/* Tools & Settings */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider mb-4 px-2">
             Tools
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {toolsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass(item.url)}>
-                      <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                      <span className="font-medium">{item.title}</span>
-                      {isActive(item.url) && (
-                        <ChevronRight className="w-4 h-4 ml-auto" />
-                      )}
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                          isActive(item.url) 
+                            ? "bg-white/20 shadow-lg" 
+                            : "bg-transparent group-hover:bg-white/10"
+                        }`}>
+                          <item.icon className="w-4 h-4 flex-shrink-0" />
+                        </div>
+                        <span className="font-medium flex-1">{item.title}</span>
+                        {isActive(item.url) && (
+                          <ChevronRight className="w-4 h-4 opacity-70" />
+                        )}
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -164,49 +188,49 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border/40">
+      <SidebarFooter className="p-4 border-t border-border/20 bg-gradient-to-t from-muted/20 to-transparent">
         <div className="space-y-4">
-          {/* User Profile Card */}
-          <div className="bg-muted/50 rounded-lg p-3 space-y-3">
+          {/* Enhanced User Profile Card */}
+          <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-2xl p-4 space-y-4 border border-border/20 backdrop-blur-sm shadow-lg">
             <div className="flex items-center space-x-3">
-              <Avatar className="w-8 h-8">
+              <Avatar className="w-10 h-10 ring-2 ring-primary/20 shadow-lg">
                 <AvatarImage src="" />
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-sm font-bold">
                   {profile?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-semibold truncate">
                   {profile?.full_name || user?.email?.split('@')[0] || "User"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground/80 truncate font-medium">
                   Recovery Journey
                 </p>
               </div>
             </div>
             
-            {/* Quick Stats */}
+            {/* Enhanced Status Badges */}
             <div className="flex space-x-2">
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-success/15 text-success border-success/20 hover:bg-success/20 transition-colors">
                 <Shield className="w-3 h-3 mr-1" />
                 Safe
               </Badge>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-accent/15 text-accent border-accent/20 hover:bg-accent/20 transition-colors">
                 <Target className="w-3 h-3 mr-1" />
                 Active
               </Badge>
             </div>
           </div>
           
-          {/* Sign Out Button */}
+          {/* Enhanced Sign Out Button */}
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={handleSignOut}
-            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:text-destructive"
+            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl p-3 group"
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+            <LogOut className="w-4 h-4 mr-3 group-hover:rotate-12 transition-transform duration-200" />
+            <span className="font-medium">Sign Out</span>
           </Button>
         </div>
       </SidebarFooter>
