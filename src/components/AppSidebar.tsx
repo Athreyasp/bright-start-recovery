@@ -37,13 +37,11 @@ const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Daily Check-in", url: "/dashboard/daily-checkin", icon: Activity },
   { title: "Risk Calculator", url: "/dashboard/risk-calculator", icon: Calculator },
-  { title: "AI Chatbot", url: "/dashboard/chatbot", icon: Bot },
 ]
 
 const healthcareItems = [
   { title: "Appointments", url: "/dashboard/appointments", icon: Calendar },
-  { title: "Psychologist", url: "/dashboard/appointments?type=psychologist", icon: Brain },
-  { title: "Psychiatrist", url: "/dashboard/appointments?type=psychiatrist", icon: Stethoscope },
+  { title: "Psychology Professionals", url: "/dashboard/psychology-professionals", icon: Brain },
 ]
 
 const toolsItems = [

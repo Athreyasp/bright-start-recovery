@@ -311,8 +311,8 @@ const RiskCalculator = () => {
                     <Link to="/dashboard/appointments">
                       <Button className="w-full">Schedule Professional Consultation</Button>
                     </Link>
-                    <Link to="/dashboard/chatbot">
-                      <Button variant="secondary" className="w-full">Chat with AI Support</Button>
+                    <Link to="/dashboard/psychology-professionals">
+                      <Button variant="secondary" className="w-full">Explore Psychology Professionals</Button>
                     </Link>
                     <Button variant="outline" className="w-full" onClick={() => {
                       // Generate and download crisis plan

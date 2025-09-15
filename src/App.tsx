@@ -12,7 +12,7 @@ import RiskCalculator from "./components/RiskCalculator";
 import AppointmentBooking from "./components/AppointmentBooking";
 import DailyCheckIn from "./components/DailyCheckIn";
 import ConsentForms from "./components/ConsentForms";
-import ChatBot from "./components/ChatBot";
+import PsychologyProfessionals from "./components/PsychologyProfessionals";
 import UserProfile from "./components/UserProfile";
 import { DashboardLayout } from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
@@ -67,10 +67,10 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/dashboard/chatbot" element={
+            <Route path="/dashboard/psychology-professionals" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <ChatBot />
+                  <PsychologyProfessionals />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
