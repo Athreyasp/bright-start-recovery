@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
+import ChatBot from "@/components/ChatBot"
 import { Button } from "@/components/ui/button"
 import { Bell, Menu, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -61,6 +62,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {children}
             </div>
           </main>
+          <ChatBot />
         </div>
       </div>
     </SidebarProvider>

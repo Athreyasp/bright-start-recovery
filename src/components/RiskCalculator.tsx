@@ -20,7 +20,7 @@ const RiskCalculator = () => {
   
   const [formData, setFormData] = useState({
     yearsOfUse: 0,
-    substanceType: "",
+    substances: [] as string[],
     frequency: "",
     stressLevel: [5],
     sleepQuality: [5],
@@ -57,7 +57,7 @@ const RiskCalculator = () => {
         const responses = assessment.responses as any;
         setFormData({
           yearsOfUse: responses.yearsOfUse || 0,
-          substanceType: responses.substanceType || '',
+          substances: responses.substances || [],
           frequency: responses.frequency || '',
           stressLevel: [responses.stressLevel || 5],
           sleepQuality: [responses.sleepQuality || 5],
@@ -124,7 +124,7 @@ const RiskCalculator = () => {
     try {
       const responseData = {
         yearsOfUse: formData.yearsOfUse,
-        substanceType: formData.substanceType,
+        substances: formData.substances,
         frequency: formData.frequency,
         stressLevel: formData.stressLevel[0],
         sleepQuality: formData.sleepQuality[0],
@@ -372,29 +372,31 @@ const RiskCalculator = () => {
             </div>
 
             <div className="space-y-3">
-              <Label>Primary substance type</Label>
-              <RadioGroup value={formData.substanceType} onValueChange={(value) => setFormData({...formData, substanceType: value})}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="alcohol" id="alcohol" />
-                  <Label htmlFor="alcohol">Alcohol</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="tobacco" id="tobacco" />
-                  <Label htmlFor="tobacco">Tobacco/Nicotine</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="opioids" id="opioids" />
-                  <Label htmlFor="opioids">Opioids</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="stimulants" id="stimulants" />
-                  <Label htmlFor="stimulants">Stimulants</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="other" id="other" />
-                  <Label htmlFor="other">Other</Label>
-                </div>
-              </RadioGroup>
+              <Label>Substances used (select all that apply)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {["Alcohol","Tobacco/Nicotine","Opioids","Stimulants","Other"].map((sub) => (
+                  <div key={sub} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={sub}
+                      checked={formData.substances.includes(sub.toLowerCase())}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            substances: [...formData.substances, sub.toLowerCase()]
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            substances: formData.substances.filter(s => s !== sub.toLowerCase())
+                          });
+                        }
+                      }}
+                    />
+                    <Label htmlFor={sub} className="text-sm">{sub}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -571,7 +573,7 @@ const RiskCalculator = () => {
               onClick={calculateRisk} 
               className="w-full" 
               size="lg"
-              disabled={!formData.substanceType || !formData.frequency || !formData.supportSystem || !formData.lastRelapse || saving}
+              disabled={!formData.substances.length || !formData.frequency || !formData.supportSystem || !formData.lastRelapse || saving}
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {saving ? "Saving Assessment..." : "Calculate My Risk Score"}

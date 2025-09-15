@@ -65,10 +65,8 @@ export function AppSidebar() {
 
   const getNavClass = (path: string) => {
     const active = isActive(path)
-    return `w-full justify-start transition-all duration-300 rounded-xl p-3 group ${
-      active 
-        ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/25 scale-105" 
-        : "hover:bg-gradient-to-r hover:from-muted/80 hover:to-muted/40 hover:scale-105 hover:shadow-lg"
+    return `w-full justify-start rounded-lg p-3 transition-colors ${
+      active ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/60'
     }`
   }
 
