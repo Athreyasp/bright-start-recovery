@@ -316,14 +316,22 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  {action.riskScore !== null && action.riskScore !== undefined && (
-                    <div className={`p-2 rounded-lg border ${getRiskBgColor(action.riskScore)} text-center`}>
-                      <span className="text-xs font-medium">Current Risk: </span>
-                      <span className={`text-sm font-bold ${getRiskColor(action.riskScore)}`}>
-                        {action.riskScore}%
-                      </span>
-                    </div>
-                  )}
+                   {action.riskScore !== null && action.riskScore !== undefined && (
+                     <div className={`p-3 rounded-lg border ${getRiskBgColor(action.riskScore)} text-center space-y-1`}>
+                       <div className="flex justify-between items-center">
+                         <span className="text-xs font-medium">Risk Level:</span>
+                         <Badge variant={action.riskScore <= 30 ? "secondary" : action.riskScore <= 70 ? "outline" : "destructive"} className="text-xs">
+                           {action.riskScore <= 30 ? "Low" : action.riskScore <= 70 ? "Moderate" : "High"}
+                         </Badge>
+                       </div>
+                       <div className="text-center">
+                         <span className={`text-xl font-bold ${getRiskColor(action.riskScore)}`}>
+                           {action.riskScore}%
+                         </span>
+                       </div>
+                       <Progress value={action.riskScore} className="h-2" />
+                     </div>
+                   )}
                   
                   {action.priority && !todayCheckIn && (
                     <div className="flex items-center space-x-1 mt-2">

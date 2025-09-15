@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +26,8 @@ const RiskCalculator = () => {
     sleepQuality: [5],
     supportSystem: "",
     lastRelapse: "",
+    triggers: [] as string[],
+    copingStrategies: [] as string[],
   });
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -60,6 +63,8 @@ const RiskCalculator = () => {
           sleepQuality: [responses.sleepQuality || 5],
           supportSystem: responses.supportSystem || '',
           lastRelapse: responses.lastRelapse || '',
+          triggers: responses.triggers || [],
+          copingStrategies: responses.copingStrategies || [],
         });
         setRiskScore(assessment.score);
         setRecommendations(responses.recommendations || []);
@@ -106,6 +111,12 @@ const RiskCalculator = () => {
     if (formData.lastRelapse === "recent") score += 25;
     else if (formData.lastRelapse === "within-year") score += 15;
     
+    // Trigger factors (higher number of triggers = higher risk)
+    score += formData.triggers.length * 3;
+    
+    // Coping strategies (more strategies = lower risk)
+    score -= formData.copingStrategies.length * 2;
+    
     const finalScore = Math.min(Math.max(score, 0), 100);
     const recs = getRecommendations(finalScore);
     
@@ -119,6 +130,8 @@ const RiskCalculator = () => {
         sleepQuality: formData.sleepQuality[0],
         supportSystem: formData.supportSystem,
         lastRelapse: formData.lastRelapse,
+        triggers: formData.triggers,
+        copingStrategies: formData.copingStrategies,
         recommendations: recs
       };
 
@@ -478,6 +491,80 @@ const RiskCalculator = () => {
                   <Label htmlFor="over-year">Over a year ago</Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Common triggers (check all that apply)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  "Stress at work",
+                  "Financial problems", 
+                  "Relationship issues",
+                  "Social pressure",
+                  "Boredom",
+                  "Depression/Anxiety",
+                  "Physical pain",
+                  "Being around substance use"
+                ].map((trigger) => (
+                  <div key={trigger} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={trigger}
+                      checked={formData.triggers.includes(trigger)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            triggers: [...formData.triggers, trigger]
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            triggers: formData.triggers.filter(t => t !== trigger)
+                          });
+                        }
+                      }}
+                    />
+                    <Label htmlFor={trigger} className="text-sm">{trigger}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Coping strategies you use (check all that apply)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  "Exercise/Physical activity",
+                  "Meditation/Mindfulness",
+                  "Support group meetings",
+                  "Talking to friends/family",
+                  "Therapy sessions",
+                  "Journaling",
+                  "Creative activities",
+                  "Professional counseling"
+                ].map((strategy) => (
+                  <div key={strategy} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={strategy}
+                      checked={formData.copingStrategies.includes(strategy)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            copingStrategies: [...formData.copingStrategies, strategy]
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            copingStrategies: formData.copingStrategies.filter(s => s !== strategy)
+                          });
+                        }
+                      }}
+                    />
+                    <Label htmlFor={strategy} className="text-sm">{strategy}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <Button 
