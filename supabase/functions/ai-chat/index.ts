@@ -49,30 +49,63 @@ serve(async (req) => {
 
     console.log('Sending request to Gemini API...');
     
-    const resp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contents: contents.slice(1), // Don't send system message in contents array
-          systemInstruction: systemMessage, // Use systemInstruction instead
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
+    // Retry logic for API overload
+    let retryCount = 0;
+    const maxRetries = 3;
+    let response;
+    
+    while (retryCount < maxRetries) {
+      try {
+        const resp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              contents: contents.slice(1), // Don't send system message in contents array
+              systemInstruction: systemMessage, // Use systemInstruction instead
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+              }
+            }),
           }
-        }),
-      }
-    );
+        );
 
-    if (!resp.ok) {
-      const t = await resp.text();
-      console.error('Gemini error:', t);
-      return new Response(JSON.stringify({ error: 'Gemini request failed', detail: t }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        if (resp.ok) {
+          response = resp;
+          break;
+        } else if (resp.status === 503 || resp.status === 429) {
+          // API overloaded or rate limited, wait and retry
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log(`Gemini API overloaded, retrying (${retryCount}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000)); // Exponential backoff
+            continue;
+          }
+        }
+        
+        // If we get here, there was an error that's not retryable
+        const errorText = await resp.text();
+        console.error('Gemini API error:', errorText);
+        throw new Error(`Gemini API error: ${resp.status} - ${errorText}`);
+        
+      } catch (error) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          throw error;
+        }
+        console.log(`Request failed, retrying (${retryCount}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+      }
+    }
+
+    if (!response) {
+      throw new Error('Failed to get response after all retries');
     }
 
     console.log('Gemini API response received');
-    const data = await resp.json();
+    const data = await response.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'I\'m here to help! Could you please rephrase your question?';
 
     return new Response(JSON.stringify({ reply }), {
@@ -80,8 +113,21 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error('ai-chat error', e);
-    return new Response(JSON.stringify({ error: e.message || 'Unknown error' }), {
-      status: 500,
+    
+    // Provide helpful fallback response for common recovery questions
+    const userMessage = (await req.json())?.messages?.slice(-1)?.[0]?.content?.toLowerCase() || '';
+    let fallbackResponse = "I'm experiencing technical difficulties right now, but I'm still here to support you. Please try again in a moment.";
+    
+    if (userMessage.includes('alcohol') || userMessage.includes('drink')) {
+      fallbackResponse = "I understand you're asking about alcohol. While I'm having technical issues, I want you to know that any amount of alcohol can be risky during recovery. Please speak with your healthcare provider or counselor about safe practices. If you're feeling urges, try calling a support hotline or reach out to your sponsor or support group.";
+    } else if (userMessage.includes('craving') || userMessage.includes('urge')) {
+      fallbackResponse = "I'm having technical issues, but if you're experiencing cravings, please remember: this feeling will pass. Try deep breathing, call your support person, or use the coping strategies you've learned. You're stronger than this moment.";
+    } else if (userMessage.includes('help') || userMessage.includes('support')) {
+      fallbackResponse = "Even though I'm having technical difficulties, please know that help is always available. Contact your counselor, support group, or call a crisis line if you need immediate support. You're not alone in this journey.";
+    }
+    
+    return new Response(JSON.stringify({ reply: fallbackResponse }), {
+      status: 200, // Return 200 with helpful message instead of error
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
