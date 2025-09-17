@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Bell, Menu, Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/ClerkAuthContext"
 import { useNavigate } from "react-router-dom"
 
 interface DashboardLayoutProps {

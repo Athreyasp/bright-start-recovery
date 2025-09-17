@@ -3,9 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { ClerkProvider } from '@clerk/clerk-react';
+import { AuthProvider } from "@/contexts/ClerkAuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AuthForm } from "@/components/auth/AuthForm";
+import { ClerkAuthForm } from "@/components/auth/ClerkAuthForm";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import RiskCalculator from "./components/RiskCalculator";
@@ -20,13 +21,21 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Add your Clerk publishable key here - get this from your Clerk dashboard
+const CLERK_PUBLISHABLE_KEY = "pk_test_your_clerk_key_here";
+
+if (!CLERK_PUBLISHABLE_KEY) {
+  throw new Error("Missing Clerk Publishable Key - Please add your Clerk key in App.tsx");
+}
+
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+  <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
           <Routes>
             <Route path="/" element={
               <ProtectedRoute requireAuth={false}>
@@ -82,7 +91,7 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/auth" element={<AuthForm />} />
+            <Route path="/auth" element={<ClerkAuthForm />} />
             <Route path="/dashboard/profile" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -97,6 +106,7 @@ const App = () => (
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
+</ClerkProvider>
 );
 
 export default App;
