@@ -33,6 +33,17 @@ const AppointmentBooking = () => {
     notes: ''
   });
 
+  const doctorsInBengaluru = [
+    { name: "Dr. Rajesh Kumar", specialty: "Addiction Medicine", location: "Koramangala, Bengaluru", experience: "15 years" },
+    { name: "Dr. Priya Sharma", specialty: "Psychiatry", location: "Indiranagar, Bengaluru", experience: "12 years" },
+    { name: "Dr. Anil Menon", specialty: "General Medicine", location: "JP Nagar, Bengaluru", experience: "18 years" },
+    { name: "Dr. Sunita Reddy", specialty: "Psychology", location: "Whitefield, Bengaluru", experience: "10 years" },
+    { name: "Dr. Vikram Singh", specialty: "Addiction Counseling", location: "Electronic City, Bengaluru", experience: "8 years" },
+    { name: "Dr. Kavitha Nair", specialty: "Psychiatry", location: "Marathahalli, Bengaluru", experience: "14 years" },
+    { name: "Dr. Ravi Krishnan", specialty: "General Medicine", location: "HSR Layout, Bengaluru", experience: "16 years" },
+    { name: "Dr. Meera Iyer", specialty: "Psychology", location: "Banashankari, Bengaluru", experience: "11 years" }
+  ];
+
   const providerTypes = [
     { value: 'doctor', label: 'General Doctor', description: 'Primary care physician for overall health' },
     { value: 'psychologist', label: 'Psychologist', description: 'Therapy and counseling services' },
@@ -220,12 +231,31 @@ const AppointmentBooking = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Provider Name (Optional)</Label>
-                <Input
-                  placeholder="Dr. Smith, Counselor Johnson, etc."
-                  value={formData.providerName}
-                  onChange={(e) => setFormData({...formData, providerName: e.target.value})}
-                />
+                <Label>Select Doctor in Bengaluru</Label>
+                <Select value={formData.providerName} onValueChange={(value) => setFormData({...formData, providerName: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose from available doctors" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {doctorsInBengaluru
+                      .filter(doctor => {
+                        if (formData.providerType === 'doctor') return doctor.specialty.includes('Medicine');
+                        if (formData.providerType === 'psychologist') return doctor.specialty === 'Psychology';
+                        if (formData.providerType === 'psychiatrist') return doctor.specialty === 'Psychiatry';
+                        if (formData.providerType === 'therapist') return doctor.specialty.includes('Counseling');
+                        return true;
+                      })
+                      .map((doctor) => (
+                        <SelectItem key={doctor.name} value={doctor.name}>
+                          <div className="flex flex-col">
+                            <div className="font-medium">{doctor.name}</div>
+                            <div className="text-sm text-muted-foreground">{doctor.specialty} • {doctor.location}</div>
+                            <div className="text-xs text-muted-foreground">{doctor.experience} experience</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">

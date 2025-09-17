@@ -38,6 +38,7 @@ const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Daily Check-in", url: "/dashboard/daily-checkin", icon: Activity },
   { title: "Risk Calculator", url: "/dashboard/risk-calculator", icon: Calculator },
+  { title: "Stress Calculator", url: "/dashboard/stress-calculator", icon: Target },
 ]
 
 const healthcareItems = [
