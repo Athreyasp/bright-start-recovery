@@ -14,7 +14,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -124,7 +124,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="hidden md:block">
                   <p className="text-sm font-medium">
                     Welcome back, <span className="text-primary font-semibold">
-                      {profile?.full_name || "User"}
+                      {profile?.full_name || user?.email?.split('@')[0] || "Guest"}
                     </span>
                   </p>
                 </div>
