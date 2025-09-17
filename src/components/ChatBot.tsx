@@ -164,7 +164,7 @@ export default function ChatBot() {
       {/* Enhanced Panel with header actions */}
       {open && (
         <div className="fixed bottom-20 right-6 z-[9998] w-80 sm:w-96 animate-enter">
-          <Card className="border-0 shadow-2xl bg-background/95 backdrop-blur-xl glass-morphism max-h-[70vh] flex flex-col">
+          <Card className="border-0 shadow-2xl bg-background/95 backdrop-blur-xl glass-morphism h-[500px] flex flex-col">
             <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 to-success/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -210,7 +210,7 @@ export default function ChatBot() {
               </div>
             )}
 
-            <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-background/50 to-background/80" style={{ maxHeight: '300px' }}>
+            <ScrollArea className="h-72 p-4 bg-gradient-to-b from-background/50 to-background/80">
               <div className="space-y-4">
                 {messages.map((m, i) => (
                   <div key={m.id} className={m.role === 'user' ? 'text-right' : 'text-left'}>
