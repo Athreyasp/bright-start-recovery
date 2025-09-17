@@ -9,6 +9,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import RiskCalculator from "./components/RiskCalculator";
+import StressCalculator from "./components/StressCalculator";
 import AppointmentBooking from "./components/AppointmentBooking";
 import DailyCheckIn from "./components/DailyCheckIn";
 import ConsentForms from "./components/ConsentForms";
@@ -57,6 +58,13 @@ const App = () => (
               <ProtectedRoute>
                 <DashboardLayout>
                   <DailyCheckIn />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/stress-calculator" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <StressCalculator />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

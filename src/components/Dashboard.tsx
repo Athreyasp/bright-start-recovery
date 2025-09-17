@@ -157,6 +157,14 @@ const Dashboard = () => {
       riskScore: riskScore
     },
     {
+      title: "Stress Calculator",
+      description: "Assess and manage stress levels",
+      icon: BarChart3,
+      color: "text-warning",
+      bgColor: "bg-warning/10",
+      href: "/dashboard/stress-calculator"
+    },
+    {
       title: "Psychology Professionals",
       description: "Find qualified specialists",
       icon: Brain,

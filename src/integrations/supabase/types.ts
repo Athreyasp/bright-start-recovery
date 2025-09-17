@@ -230,6 +230,72 @@ export type Database = {
         }
         Relationships: []
       }
+      stress_assessments: {
+        Row: {
+          coping_mechanisms: string | null
+          created_at: string
+          emotional_symptoms: string[] | null
+          exercise_frequency: number
+          financial_stress: number
+          health_concerns: number
+          id: string
+          physical_symptoms: string[] | null
+          recommendations: string[]
+          relationship_stress: number
+          sleep_hours: number
+          social_support: number
+          stress_category: string
+          stress_level: number
+          stress_triggers: string | null
+          total_score: number
+          updated_at: string
+          user_id: string
+          work_pressure: number
+        }
+        Insert: {
+          coping_mechanisms?: string | null
+          created_at?: string
+          emotional_symptoms?: string[] | null
+          exercise_frequency: number
+          financial_stress: number
+          health_concerns: number
+          id?: string
+          physical_symptoms?: string[] | null
+          recommendations?: string[]
+          relationship_stress: number
+          sleep_hours: number
+          social_support: number
+          stress_category: string
+          stress_level: number
+          stress_triggers?: string | null
+          total_score: number
+          updated_at?: string
+          user_id: string
+          work_pressure: number
+        }
+        Update: {
+          coping_mechanisms?: string | null
+          created_at?: string
+          emotional_symptoms?: string[] | null
+          exercise_frequency?: number
+          financial_stress?: number
+          health_concerns?: number
+          id?: string
+          physical_symptoms?: string[] | null
+          recommendations?: string[]
+          relationship_stress?: number
+          sleep_hours?: number
+          social_support?: number
+          stress_category?: string
+          stress_level?: number
+          stress_triggers?: string | null
+          total_score?: number
+          updated_at?: string
+          user_id?: string
+          work_pressure?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -253,7 +253,18 @@ export default function StressCalculator() {
     try {
       const assessmentData = {
         user_id: user.id,
-        ...formData,
+        stress_level: formData.stress_level || 5,
+        sleep_hours: formData.sleep_hours || 7,
+        exercise_frequency: formData.exercise_frequency || 3,
+        work_pressure: formData.work_pressure || 0,
+        relationship_stress: formData.relationship_stress || 0,
+        financial_stress: formData.financial_stress || 0,
+        health_concerns: formData.health_concerns || 0,
+        social_support: formData.social_support || 7,
+        coping_mechanisms: formData.coping_mechanisms || '',
+        stress_triggers: formData.stress_triggers || '',
+        physical_symptoms: formData.physical_symptoms || [],
+        emotional_symptoms: formData.emotional_symptoms || [],
         total_score: calculatedResults.score,
         stress_category: calculatedResults.category,
         recommendations: calculatedResults.recommendations
