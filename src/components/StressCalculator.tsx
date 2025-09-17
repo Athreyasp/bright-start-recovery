@@ -506,14 +506,14 @@ Remember: Recovery is a journey, not a destination. Each day sober is a victory.
         </Card>
 
         {/* Recovery Resources */}
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Play className="w-5 h-5" />
               Recovery Resources & Support
             </CardTitle>
             <CardDescription>
-              Professional resources to help you manage stress and improve your well-being
+              Professional resources to help you overcome addiction and improve your well-being
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -539,7 +539,9 @@ Remember: Recovery is a journey, not a destination. Each day sober is a victory.
                       onClick={() => window.open(resource.url, '_blank')}
                     >
                       <ExternalLink className="w-4 h-4 mr-1" />
-                      {resource.type === 'Emergency Support' ? 'Get Help' : 'View'}
+                      {resource.type === 'Emergency Support' ? 'Get Help' : 
+                       resource.type === 'Book' ? 'Buy Book' : 
+                       resource.type === 'Support Group' ? 'Find Meetings' : 'Watch'}
                     </Button>
                   </div>
                 </div>
