@@ -57,7 +57,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </header>
           
           {/* Enhanced Main Content */}
-          <main className="flex-1 overflow-auto bg-dashboard">
+          <main className="flex-1 overflow-auto bg-gradient-to-br from-background via-background to-muted/10">
             <div className="container mx-auto p-6 max-w-7xl">
               {children}
             </div>

@@ -27,8 +27,12 @@ const Dashboard = () => {
   }, [user]);
 
   const fetchDashboardData = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, skipping dashboard data fetch');
+      return;
+    }
     
+    console.log('Fetching dashboard data for user:', user.id);
     try {
       const today = new Date().toISOString().split('T')[0];
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -120,6 +124,11 @@ const Dashboard = () => {
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error loading dashboard",
+        description: "Failed to load dashboard data. Please refresh the page.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -214,7 +223,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading your dashboard...</p>
@@ -224,7 +233,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-full bg-dashboard">
+    <div className="min-h-full bg-gradient-to-br from-background via-background to-muted/20">
       <div className="space-y-8">
         {/* Enhanced Welcome Section */}
         <div className="relative">
