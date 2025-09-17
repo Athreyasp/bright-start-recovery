@@ -23,6 +23,12 @@ const queryClient = new QueryClient();
 
 // Get Clerk publishable key from environment or use placeholder
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_placeholder";
+// Validate key to avoid mounting Clerk with invalid placeholder
+const isValidClerkKey =
+  typeof CLERK_PUBLISHABLE_KEY === "string" &&
+  CLERK_PUBLISHABLE_KEY.startsWith("pk_") &&
+  !CLERK_PUBLISHABLE_KEY.includes("your_clerk_key_here") &&
+  CLERK_PUBLISHABLE_KEY !== "pk_test_placeholder";
 
 // Simple component to show setup instructions
 const ClerkSetupMessage = () => (
@@ -45,8 +51,8 @@ const ClerkSetupMessage = () => (
 );
 
 const App = () => {
-  // Show setup message if Clerk key is not configured
-  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY === "pk_test_placeholder") {
+  // Show setup message if Clerk key is not configured or invalid
+  if (!isValidClerkKey) {
     return <ClerkSetupMessage />;
   }
 
