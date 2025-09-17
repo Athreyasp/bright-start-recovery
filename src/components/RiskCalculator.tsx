@@ -6,11 +6,81 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2, Download, ExternalLink, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+
+const recoveryResources = [
+  {
+    title: "Recovery from Addiction - Complete Guide",
+    type: "YouTube Video",
+    url: "https://www.youtube.com/watch?v=7CVYDG9ywnI",
+    description: "Comprehensive guide to understanding and overcoming addiction"
+  },
+  {
+    title: "The Science of Addiction Recovery",
+    type: "YouTube Video",
+    url: "https://www.youtube.com/watch?v=H0WHkP5WNYI",
+    description: "Understanding brain chemistry and addiction recovery process"
+  },
+  {
+    title: "Daily Recovery Practices & Habits",
+    type: "YouTube Video", 
+    url: "https://www.youtube.com/watch?v=aFLCdaOF6YE",
+    description: "Practical daily habits for maintaining sobriety and recovery"
+  },
+  {
+    title: "Guided Meditation for Addiction Recovery",
+    type: "YouTube Video",
+    url: "https://www.youtube.com/watch?v=ZToicYcHIOU",
+    description: "10-minute guided meditation to reduce cravings and stress"
+  },
+  {
+    title: "Breathing Exercises for Cravings",
+    type: "YouTube Video", 
+    url: "https://www.youtube.com/watch?v=tybOi4hjZFQ",
+    description: "Instant techniques to manage cravings and urges"
+  },
+  {
+    title: "The Body Keeps the Score by Bessel van der Kolk",
+    type: "Book",
+    url: "https://www.amazon.com/Body-Keeps-Score-Healing-Trauma/dp/0143127748",
+    description: "Essential reading on trauma and recovery - highly recommended for addiction recovery"
+  },
+  {
+    title: "Atomic Habits by James Clear",
+    type: "Book",
+    url: "https://www.amazon.com/Atomic-Habits-Proven-Build-Break/dp/0735211299",
+    description: "Building healthy habits and breaking destructive patterns"
+  },
+  {
+    title: "Clean by David Sheff",
+    type: "Book",
+    url: "https://www.amazon.com/Clean-Overcoming-Addiction-Ending-Americas/dp/0544112326",
+    description: "Comprehensive guide to overcoming addiction and ending America's greatest tragedy"
+  },
+  {
+    title: "SAMHSA National Helpline",
+    type: "Emergency Support",
+    url: "https://www.samhsa.gov/find-help/national-helpline",
+    description: "Call 1-800-662-4357 for 24/7 treatment referral and information"
+  },
+  {
+    title: "Narcotics Anonymous",
+    type: "Support Group",
+    url: "https://www.na.org/",
+    description: "Find local NA meetings and support groups"
+  },
+  {
+    title: "Alcoholics Anonymous",
+    type: "Support Group",
+    url: "https://www.aa.org/",
+    description: "Find local AA meetings and support groups"
+  }
+];
 
 const RiskCalculator = () => {
   const { user } = useAuth();
@@ -161,6 +231,104 @@ const RiskCalculator = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const generatePersonalizedCrisisPlan = () => {
+    if (!user || riskScore === null) return;
+
+    const currentDate = new Date().toLocaleDateString();
+    const userName = user.email.split('@')[0]; // Use email prefix as name fallback
+    
+    const emergencyContacts = [
+      "SAMHSA National Helpline: 1-800-662-4357",
+      "Crisis Text Line: Text HOME to 741741",
+      "National Suicide Prevention Lifeline: 988",
+      "Local Emergency Services: 911"
+    ];
+
+    const riskLevel = riskScore > 70 ? 'HIGH RISK' : riskScore > 30 ? 'MODERATE RISK' : 'LOW RISK';
+    
+    const plan = `
+PERSONAL CRISIS PLAN - ${userName.toUpperCase()}
+Generated: ${currentDate}
+Risk Level: ${riskLevel} (${riskScore}%)
+
+===========================================
+EMERGENCY CONTACTS (Call immediately in crisis)
+===========================================
+${emergencyContacts.map(contact => `• ${contact}`).join('\n')}
+
+===========================================
+MY RISK FACTORS
+===========================================
+Substance History: ${formData.yearsOfUse} years
+Usage Pattern: ${formData.frequency}
+Stress Level: ${formData.stressLevel[0]}/10
+Sleep Quality: ${formData.sleepQuality[0]}/10
+Support System: ${formData.supportSystem}
+Last Relapse: ${formData.lastRelapse}
+
+My Known Triggers:
+${formData.triggers.map(trigger => `• ${trigger}`).join('\n') || '• Identify and document your personal triggers'}
+
+===========================================
+MY COPING STRATEGIES
+===========================================
+${formData.copingStrategies.map(strategy => `• ${strategy}`).join('\n') || '• Develop and practice healthy coping mechanisms'}
+
+Additional Emergency Strategies:
+• Call my sponsor or support person immediately
+• Remove myself from triggering situations
+• Use grounding techniques (5-4-3-2-1 method)
+• Practice deep breathing exercises
+• Attend an emergency AA/NA meeting
+• Go to a safe place (family, friend, treatment center)
+
+===========================================
+MY PERSONALIZED RECOMMENDATIONS
+===========================================
+${recommendations.map(rec => `• ${rec}`).join('\n')}
+
+===========================================
+MY RECOVERY RESOURCES
+===========================================
+${recoveryResources.slice(0, 5).map(resource => `• ${resource.title}: ${resource.url}`).join('\n')}
+
+===========================================
+MY PERSONAL COMMITMENT
+===========================================
+I commit to:
+• Calling for help immediately when I feel unsafe or triggered
+• Following my treatment plan consistently
+• Being honest with my support network about my struggles
+• Attending regular meetings and therapy sessions
+• Using my coping strategies before situations escalate
+• Staying connected with my recovery community
+
+Risk Assessment Score: ${riskScore}% (${riskLevel})
+Assessment Date: ${currentDate}
+
+This plan is personalized based on my risk assessment on ${currentDate}.
+I will review and update this plan regularly with my healthcare provider.
+
+Remember: Recovery is a daily choice. You have the strength to overcome challenges.
+One day at a time. You are not alone in this journey.
+`;
+
+    const blob = new Blob([plan], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Risk_Crisis_Plan_${userName}_${currentDate.replace(/\//g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Crisis Plan Downloaded",
+      description: "Your personalized crisis plan has been saved to your device"
+    });
   };
 
   const getRiskLevel = (score: number) => {
@@ -314,14 +482,13 @@ const RiskCalculator = () => {
                     <Link to="/dashboard/psychology-professionals">
                       <Button variant="secondary" className="w-full">Explore Psychology Professionals</Button>
                     </Link>
-                    <Button variant="outline" className="w-full" onClick={() => {
-                      // Generate and download crisis plan
-                      toast({
-                        title: "Crisis Plan",
-                        description: "Your personalized crisis plan will be available soon.",
-                      });
-                    }}>
-                      Download Crisis Plan
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={generatePersonalizedCrisisPlan}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download My Crisis Plan
                     </Button>
                   </div>
                   
@@ -333,7 +500,52 @@ const RiskCalculator = () => {
             </Card>
           </div>
 
-          <div className="mt-8 text-center">
+          {/* Recovery Resources */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5" />
+                Recovery Resources & Support
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Professional resources to help you overcome addiction and improve your well-being
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {recoveryResources.map((resource, index) => (
+                  <div key={index} className="border rounded-lg p-4 hover:bg-muted transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold">{resource.title}</h4>
+                          <Badge variant="outline" className="text-xs">
+                            {resource.type}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {resource.description}
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => window.open(resource.url, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        {resource.type === 'Emergency Support' ? 'Get Help' : 
+                         resource.type === 'Book' ? 'Buy Book' : 
+                         resource.type === 'Support Group' ? 'Find Meetings' : 'Watch'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="mt-8 text-center space-y-4">
             <Button variant="outline" onClick={() => setShowResults(false)}>
               Retake Assessment
             </Button>
