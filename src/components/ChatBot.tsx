@@ -39,48 +39,85 @@ export default function ChatBot() {
 
   return (
     <div>
-      {/* Launcher */}
+      {/* Enhanced Launcher */}
       <button
-        aria-label="Open chat"
+        aria-label="Open AI Assistant"
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 rounded-full p-4 bg-primary text-primary-foreground shadow-lg hover:opacity-90 focus:outline-none"
+        className="fixed bottom-6 right-6 z-[9999] rounded-full p-4 bg-primary text-primary-foreground shadow-2xl hover:shadow-xl hover:scale-110 transform transition-all duration-300 pulse-ring"
       >
-        {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full animate-pulse" />
       </button>
 
-      {/* Panel */}
+      {/* Enhanced Panel */}
       {open && (
-        <div className="fixed bottom-20 right-6 z-50 w-80 sm:w-96 animate-enter">
-          <Card className="border shadow-xl bg-background">
-            <div className="p-4 border-b">
-              <p className="font-semibold">AI Chatbot</p>
-              <p className="text-xs text-muted-foreground">Ask about wellness, appointments, or app help.</p>
+        <div className="fixed bottom-20 right-6 z-[9998] w-80 sm:w-96 animate-enter">
+          <Card className="border-0 shadow-2xl bg-background/95 backdrop-blur-xl glass-morphism">
+            <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 to-success/10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">AI Recovery Assistant</p>
+                  <p className="text-xs text-muted-foreground">Here to support your wellness journey</p>
+                </div>
+              </div>
             </div>
 
-            <ScrollArea className="h-72 p-4">
-              <div className="space-y-3">
+            <ScrollArea className="h-80 p-4 bg-gradient-to-b from-background/50 to-background/80">
+              <div className="space-y-4">
                 {messages.map((m, i) => (
                   <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
-                    <div className={`inline-block px-3 py-2 rounded-lg text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                    <div className={`inline-block px-4 py-3 rounded-2xl text-sm max-w-[85%] shadow-sm ${
+                      m.role === 'user' 
+                        ? 'bg-primary text-primary-foreground shadow-primary/20' 
+                        : 'bg-muted border border-border/50 text-foreground'
+                    }`}>
                       {m.content}
                     </div>
                   </div>
                 ))}
+                {loading && (
+                  <div className="text-left">
+                    <div className="inline-block px-4 py-3 rounded-2xl bg-muted border border-border/50 max-w-[85%]">
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                        </div>
+                        <span className="text-xs text-muted-foreground">AI is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div ref={endRef} />
               </div>
             </ScrollArea>
 
-            <div className="p-3 border-t flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={loading ? 'Thinking…' : 'Type your message'}
-                onKeyDown={(e) => e.key === 'Enter' && send()}
-                disabled={loading}
-              />
-              <Button onClick={send} disabled={loading || !input.trim()} className="shrink-0">
-                <Send className="w-4 h-4" />
-              </Button>
+            <div className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm">
+              <div className="flex gap-3">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={loading ? 'AI is thinking...' : 'Ask me anything about your recovery...'}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
+                  disabled={loading}
+                  className="flex-1 border-border/50 focus-visible:ring-primary/50 bg-background/60"
+                />
+                <Button 
+                  onClick={send} 
+                  disabled={loading || !input.trim()} 
+                  className="shrink-0 px-4 shadow-lg hover:shadow-xl transition-all duration-200"
+                  size="default"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Your AI assistant is here 24/7 to support you
+              </p>
             </div>
           </Card>
         </div>
