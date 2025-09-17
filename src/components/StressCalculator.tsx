@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Heart, Brain, Activity, ArrowLeft, ExternalLink, Play } from "lucide-react";
+import { AlertCircle, Heart, Brain, Activity, ArrowLeft, ExternalLink, Play, Download } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,40 +45,88 @@ const emotionalSymptoms = [
 
 const recoveryResources = [
   {
-    title: "Guided Meditation for Stress Relief",
+    title: "Recovery from Addiction - Complete Guide",
+    type: "YouTube Video",
+    url: "https://www.youtube.com/watch?v=7CVYDG9ywnI",
+    description: "Comprehensive guide to understanding and overcoming addiction"
+  },
+  {
+    title: "The Science of Addiction Recovery",
+    type: "YouTube Video",
+    url: "https://www.youtube.com/watch?v=H0WHkP5WNYI",
+    description: "Understanding brain chemistry and addiction recovery process"
+  },
+  {
+    title: "Daily Recovery Practices & Habits",
+    type: "YouTube Video", 
+    url: "https://www.youtube.com/watch?v=aFLCdaOF6YE",
+    description: "Practical daily habits for maintaining sobriety and recovery"
+  },
+  {
+    title: "Guided Meditation for Addiction Recovery",
     type: "YouTube Video",
     url: "https://www.youtube.com/watch?v=ZToicYcHIOU",
-    description: "10-minute guided meditation to reduce stress and anxiety"
+    description: "10-minute guided meditation to reduce cravings and stress"
   },
   {
-    title: "Breathing Exercises for Instant Calm",
+    title: "Breathing Exercises for Cravings",
     type: "YouTube Video", 
     url: "https://www.youtube.com/watch?v=tybOi4hjZFQ",
-    description: "Simple breathing techniques you can use anywhere"
+    description: "Instant techniques to manage cravings and urges"
   },
   {
-    title: "Progressive Muscle Relaxation",
+    title: "Progressive Muscle Relaxation for Recovery",
     type: "YouTube Video",
     url: "https://www.youtube.com/watch?v=86HUcX8ZtAk",
-    description: "Full body relaxation technique to release tension"
+    description: "Full body relaxation to release tension and anxiety"
   },
   {
-    title: "Stress Management Techniques",
-    type: "Article",
-    url: "https://www.mayoclinic.org/healthy-lifestyle/stress-management/in-depth/stress-management/art-20044289",
-    description: "Comprehensive guide from Mayo Clinic on managing stress"
+    title: "The Body Keeps the Score by Bessel van der Kolk",
+    type: "Book",
+    url: "https://www.amazon.com/Body-Keeps-Score-Healing-Trauma/dp/0143127748",
+    description: "Essential reading on trauma and recovery - highly recommended for addiction recovery"
   },
   {
-    title: "Mindfulness-Based Stress Reduction",
-    type: "Course",
-    url: "https://www.mindfulnessmbesr.com/",
-    description: "Evidence-based program for stress reduction"
+    title: "Atomic Habits by James Clear",
+    type: "Book",
+    url: "https://www.amazon.com/Atomic-Habits-Proven-Build-Break/dp/0735211299",
+    description: "Building healthy habits and breaking destructive patterns"
+  },
+  {
+    title: "Clean by David Sheff",
+    type: "Book",
+    url: "https://www.amazon.com/Clean-Overcoming-Addiction-Ending-Americas/dp/0544112326",
+    description: "Comprehensive guide to overcoming addiction and ending America's greatest tragedy"
+  },
+  {
+    title: "The Craving Mind by Judson Brewer",
+    type: "Book",
+    url: "https://www.amazon.com/Craving-Mind-Cigarettes-Smartphones-Facebook/dp/0300234538",
+    description: "Understanding and overcoming addictive behaviors through mindfulness"
+  },
+  {
+    title: "SAMHSA National Helpline",
+    type: "Emergency Support",
+    url: "https://www.samhsa.gov/find-help/national-helpline",
+    description: "Call 1-800-662-4357 for 24/7 treatment referral and information"
   },
   {
     title: "Crisis Text Line",
     type: "Emergency Support",
     url: "https://www.crisistextline.org/",
     description: "Text HOME to 741741 for immediate crisis support"
+  },
+  {
+    title: "Narcotics Anonymous",
+    type: "Support Group",
+    url: "https://www.na.org/",
+    description: "Find local NA meetings and support groups"
+  },
+  {
+    title: "Alcoholics Anonymous",
+    type: "Support Group",
+    url: "https://www.aa.org/",
+    description: "Find local AA meetings and support groups"
   }
 ];
 
@@ -307,6 +355,104 @@ export default function StressCalculator() {
     return <AlertCircle className="w-6 h-6 text-red-600" />;
   };
 
+  const generatePersonalizedCrisisPlan = () => {
+    if (!results || !formData || !user) return;
+
+    const currentDate = new Date().toLocaleDateString();
+    const userName = user.email.split('@')[0]; // Use email prefix as name fallback
+    
+    const emergencyContacts = [
+      "SAMHSA National Helpline: 1-800-662-4357",
+      "Crisis Text Line: Text HOME to 741741",
+      "National Suicide Prevention Lifeline: 988",
+      "Local Emergency Services: 911"
+    ];
+
+    const personalizedTriggers = formData.stress_triggers ? 
+      formData.stress_triggers.split(',').map(t => t.trim()).filter(t => t.length > 0) : 
+      ['High stress situations', 'Overwhelming emotions', 'Social conflicts'];
+
+    const personalizedCoping = formData.coping_mechanisms ? 
+      formData.coping_mechanisms.split(',').map(c => c.trim()).filter(c => c.length > 0) : 
+      ['Deep breathing exercises', 'Call a support person', 'Remove yourself from triggers'];
+
+    const riskLevel = results.score > 60 ? 'HIGH RISK' : results.score > 30 ? 'MODERATE RISK' : 'LOW RISK';
+    
+    const plan = `
+PERSONAL CRISIS PLAN - ${userName.toUpperCase()}
+Generated: ${currentDate}
+Risk Level: ${riskLevel}
+
+===========================================
+EMERGENCY CONTACTS (Call immediately in crisis)
+===========================================
+${emergencyContacts.map(contact => `• ${contact}`).join('\n')}
+
+===========================================
+MY PERSONAL WARNING SIGNS
+===========================================
+Physical Symptoms:
+${(formData.physical_symptoms || []).map(symptom => `• ${symptom}`).join('\n') || '• Monitor for changes in physical well-being'}
+
+Emotional Symptoms:
+${(formData.emotional_symptoms || []).map(symptom => `• ${symptom}`).join('\n') || '• Monitor for changes in emotional state'}
+
+My Stress Triggers:
+${personalizedTriggers.map(trigger => `• ${trigger}`).join('\n')}
+
+===========================================
+MY COPING STRATEGIES
+===========================================
+${personalizedCoping.map(coping => `• ${coping}`).join('\n')}
+
+Additional Strategies:
+• Practice 4-7-8 breathing (4 seconds in, 7 hold, 8 out)
+• Use grounding techniques (5-4-3-2-1 method)
+• Reach out to my support network
+• Remove myself from triggering situations
+• Use positive self-talk and affirmations
+
+===========================================
+MY RECOVERY RESOURCES
+===========================================
+${recoveryResources.slice(0, 5).map(resource => `• ${resource.title}: ${resource.url}`).join('\n')}
+
+===========================================
+MY PERSONAL COMMITMENT
+===========================================
+I commit to:
+• Contacting help immediately when I feel unsafe
+• Using my coping strategies before situations escalate
+• Being honest with my support network about my struggles
+• Attending regular check-ins with healthcare providers
+• Following my treatment plan consistently
+
+Current Stress Level: ${results.score}/100 (${results.category})
+Sleep Average: ${formData.sleep_hours || 'Not specified'} hours
+Exercise Frequency: ${formData.exercise_frequency || 'Not specified'} days/week
+
+This plan is personalized based on my assessment on ${currentDate}.
+I will review and update this plan regularly with my healthcare provider.
+
+Remember: Recovery is a journey, not a destination. Each day sober is a victory.
+`;
+
+    const blob = new Blob([plan], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Crisis_Plan_${userName}_${currentDate.replace(/\//g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Crisis Plan Downloaded",
+      description: "Your personalized crisis plan has been saved to your device"
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -405,6 +551,14 @@ export default function StressCalculator() {
         <div className="flex gap-4 mt-8">
           <Button onClick={() => setShowResults(false)} variant="outline" className="flex-1">
             Retake Assessment
+          </Button>
+          <Button 
+            onClick={generatePersonalizedCrisisPlan}
+            variant="secondary" 
+            className="flex-1"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download My Crisis Plan
           </Button>
           <Button asChild className="flex-1">
             <Link to="/dashboard">Return to Dashboard</Link>
