@@ -20,18 +20,48 @@ serve(async (req) => {
 
     const { messages } = await req.json();
 
-    // Convert messages to Gemini content format
-    const contents = (messages || []).map((m: { role: string; content: string }) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
+    // System prompt for recovery platform
+    const systemMessage = {
+      role: 'model',
+      parts: [{ 
+        text: `You are a compassionate AI assistant for a recovery and wellness platform. Your role is to:
+        
+        1. Provide supportive, non-judgmental responses about addiction recovery, mental health, and wellness
+        2. Encourage users to seek professional help when appropriate
+        3. Share general wellness tips and coping strategies
+        4. Help users navigate the app features like appointments, risk assessments, and daily check-ins
+        5. Always maintain a warm, understanding, and hopeful tone
+        6. Never provide medical advice - always refer to healthcare professionals for medical concerns
+        7. Focus on empowerment, self-care, and positive recovery steps
+        
+        Remember: You're here to support their wellness journey, not replace professional treatment.` 
+      }]
+    };
 
+    // Convert messages to Gemini content format and add system message
+    const contents = [
+      systemMessage,
+      ...(messages || []).map((m: { role: string; content: string }) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }))
+    ];
+
+    console.log('Sending request to Gemini API...');
+    
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents }),
+        body: JSON.stringify({ 
+          contents: contents.slice(1), // Don't send system message in contents array
+          systemInstruction: systemMessage, // Use systemInstruction instead
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
+        }),
       }
     );
 
@@ -41,8 +71,9 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Gemini request failed', detail: t }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    console.log('Gemini API response received');
     const data = await resp.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'I\'m here to help! Could you please rephrase your question?';
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
