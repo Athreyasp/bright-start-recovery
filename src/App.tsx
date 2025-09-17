@@ -21,14 +21,36 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Add your Clerk publishable key here - get this from your Clerk dashboard
-const CLERK_PUBLISHABLE_KEY = "pk_test_your_clerk_key_here";
+// Get Clerk publishable key from environment or use placeholder
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_placeholder";
 
-if (!CLERK_PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key - Please add your Clerk key in App.tsx");
-}
+// Simple component to show setup instructions
+const ClerkSetupMessage = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="max-w-md text-center space-y-4">
+      <h1 className="text-2xl font-bold text-primary">QuitBuddy</h1>
+      <div className="bg-card p-6 rounded-lg border">
+        <h2 className="text-lg font-semibold mb-3">Setup Required</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          To use authentication, please add your Clerk publishable key:
+        </p>
+        <ol className="text-sm text-left space-y-2 text-muted-foreground">
+          <li>1. Go to <a href="https://dashboard.clerk.com" target="_blank" className="text-primary underline">Clerk Dashboard</a></li>
+          <li>2. Copy your publishable key</li>
+          <li>3. Replace CLERK_PUBLISHABLE_KEY in App.tsx</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+);
 
-const App = () => (
+const App = () => {
+  // Show setup message if Clerk key is not configured
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY === "pk_test_placeholder") {
+    return <ClerkSetupMessage />;
+  }
+
+  return (
   <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -107,6 +129,7 @@ const App = () => (
     </BrowserRouter>
   </QueryClientProvider>
 </ClerkProvider>
-);
+  );
+};
 
 export default App;
