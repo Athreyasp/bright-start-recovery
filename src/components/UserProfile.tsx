@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, User, Calendar, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/ClerkAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const UserProfile = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -63,10 +63,10 @@ const UserProfile = () => {
                   disabled={!editing}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input value={user?.primaryEmailAddress?.emailAddress || ''} disabled />
-              </div>
+               <div className="space-y-2">
+                 <Label>Email</Label>
+                 <Input value={user?.email || ''} disabled />
+               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">

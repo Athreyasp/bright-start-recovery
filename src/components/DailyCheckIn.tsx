@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Heart, Brain, Moon, Activity, Target, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/ClerkAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 

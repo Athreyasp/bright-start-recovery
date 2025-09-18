@@ -3,10 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ClerkProvider } from '@clerk/clerk-react';
-import { AuthProvider } from "@/contexts/ClerkAuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { ClerkAuthForm } from "@/components/auth/ClerkAuthForm";
+import { AuthForm } from "@/components/auth/AuthForm";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import RiskCalculator from "./components/RiskCalculator";
@@ -21,43 +20,8 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Get Clerk publishable key from environment or use placeholder
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_placeholder";
-// Validate key to avoid mounting Clerk with invalid placeholder
-const isValidClerkKey =
-  typeof CLERK_PUBLISHABLE_KEY === "string" &&
-  CLERK_PUBLISHABLE_KEY.startsWith("pk_") &&
-  !CLERK_PUBLISHABLE_KEY.includes("your_clerk_key_here") &&
-  CLERK_PUBLISHABLE_KEY !== "pk_test_placeholder";
-
-// Simple component to show setup instructions
-const ClerkSetupMessage = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center p-4">
-    <div className="max-w-md text-center space-y-4">
-      <h1 className="text-2xl font-bold text-primary">QuitBuddy</h1>
-      <div className="bg-card p-6 rounded-lg border">
-        <h2 className="text-lg font-semibold mb-3">Setup Required</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          To use authentication, please add your Clerk publishable key:
-        </p>
-        <ol className="text-sm text-left space-y-2 text-muted-foreground">
-          <li>1. Go to <a href="https://dashboard.clerk.com" target="_blank" className="text-primary underline">Clerk Dashboard</a></li>
-          <li>2. Copy your publishable key</li>
-          <li>3. Replace CLERK_PUBLISHABLE_KEY in App.tsx</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-);
-
 const App = () => {
-  // Show setup message if Clerk key is not configured or invalid
-  if (!isValidClerkKey) {
-    return <ClerkSetupMessage />;
-  }
-
   return (
-  <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
@@ -119,7 +83,7 @@ const App = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/auth" element={<ClerkAuthForm />} />
+            <Route path="/auth" element={<AuthForm />} />
             <Route path="/dashboard/profile" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -131,10 +95,9 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-</ClerkProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 

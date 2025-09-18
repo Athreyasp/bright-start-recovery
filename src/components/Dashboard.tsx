@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Calculator, FileText, Calendar, Brain, Bot, User, Activity, Heart, TrendingUp, Clock, CheckCircle, Target, Award, Trophy, BarChart3, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/ClerkAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
