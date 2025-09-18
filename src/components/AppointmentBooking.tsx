@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, User, Loader2, Plus } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/ClerkAuthContext";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";

@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, AlertTriangle, CheckCircle, TrendingUp, Loader2, Download, ExternalLink, Play } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/ClerkAuthContext";
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
