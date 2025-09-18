@@ -1,131 +1,132 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react'
-import { supabase } from '@/integrations/supabase/client'
-import type { Database } from '@/integrations/supabase/types'
-import { useToast } from '@/hooks/use-toast'
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+import { useToast } from '@/hooks/use-toast';
 
-type Profile = Database['public']['Tables']['profiles']['Row']
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
-  user: any // Clerk user object
-  profile: Profile | null
-  session: any
-  loading: boolean
-  signOut: () => Promise<void>
-  updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>
-  supabaseUserId: string | null // The UUID we use for Supabase operations
+  user: User | null;
+  profile: Profile | null;
+  session: any;
+  loading: boolean;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  supabaseUserId: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-// Function to generate a consistent UUID from Clerk user ID
-const generateSupabaseUserId = (clerkUserId: string): string => {
-  // Use a more robust method to create a consistent UUID from the Clerk user ID
-  // This ensures the same Clerk user always gets the same UUID
-  
-  // Simple hash function to create a pseudo-UUID
-  let hash1 = 0, hash2 = 0;
-  
-  for (let i = 0; i < clerkUserId.length; i++) {
-    const char = clerkUserId.charCodeAt(i);
-    hash1 = ((hash1 << 5) - hash1) + char;
-    hash1 = hash1 & hash1; // Convert to 32-bit integer
-    hash2 = ((hash2 << 3) - hash2) + char;
-    hash2 = hash2 & hash2;
-  }
-  
-  // Create UUID format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-  const hex1 = Math.abs(hash1).toString(16).padStart(8, '0').substring(0, 8);
-  const hex2 = Math.abs(hash2).toString(16).padStart(8, '0').substring(0, 8);
-  
-  return `${hex1.substring(0, 8)}-${hex1.substring(0, 4)}-4${hex1.substring(1, 4)}-a${hex2.substring(0, 3)}-${hex2.substring(0, 12).padStart(12, '0')}`;
-}
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded } = useUser()
-  const { signOut: clerkSignOut } = useClerkAuth()
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (isLoaded && user) {
-      // Generate consistent UUID for this Clerk user
-      const generatedUserId = generateSupabaseUserId(user.id)
-      setSupabaseUserId(generatedUserId)
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setSupabaseUserId(session?.user?.id ?? null);
       
-      // Fetch or create profile
-      fetchOrCreateProfile(generatedUserId, user)
-    } else if (isLoaded && !user) {
-      setProfile(null)
-      setSupabaseUserId(null)
-    }
-  }, [user, isLoaded])
+      if (session?.user) {
+        loadUserProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
 
-  const fetchOrCreateProfile = async (userId: string, clerkUser: any) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setSupabaseUserId(session?.user?.id ?? null);
+      
+      if (session?.user) {
+        await loadUserProfile(session.user.id);
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function loadUserProfile(userId: string) {
     try {
-      // Try to fetch existing profile
+      // Check if profile exists
       const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle()
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', fetchError)
-        return
+      if (fetchError) {
+        console.error('Error fetching profile:', fetchError);
+        throw fetchError;
       }
 
       if (existingProfile) {
-        setProfile(existingProfile)
+        setProfile(existingProfile);
       } else {
-        // Create new profile for this user
+        // Create new profile
         const newProfile = {
           user_id: userId,
-          full_name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || clerkUser.primaryEmailAddress?.emailAddress || 'User',
+          full_name: user?.email?.split('@')[0] || 'User',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }
+        };
 
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
-          .insert(newProfile)
+          .insert([newProfile])
           .select()
-          .single()
+          .single();
 
         if (createError) {
-          console.error('Error creating profile:', createError)
+          console.error('Error creating profile:', createError);
           toast({
             title: "Profile Creation Error",
             description: "Failed to create user profile. Please try again.",
             variant: "destructive"
-          })
+          });
         } else {
-          setProfile(createdProfile)
+          setProfile(createdProfile);
           toast({
             title: "Welcome to QuitBuddy!",
             description: "Your profile has been created successfully.",
-          })
+          });
         }
       }
     } catch (error) {
-      console.error('Error in fetchOrCreateProfile:', error)
+      console.error('Error in loadUserProfile:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
-  const signOut = async () => {
-    await clerkSignOut()
-    setProfile(null)
-    setSupabaseUserId(null)
-    toast({
-      title: "Signed out",
-      description: "You've been successfully signed out.",
-    })
-  }
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setProfile(null);
+      setSupabaseUserId(null);
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out.",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!supabaseUserId) {
-      return { error: new Error('No user ID available') }
+      return { error: new Error('No user ID available') };
     }
 
     try {
@@ -135,52 +136,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...updates,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', supabaseUserId)
+        .eq('user_id', supabaseUserId);
 
       if (error) {
         toast({
           title: "Update Error",
           description: "Failed to update profile. Please try again.",
           variant: "destructive"
-        })
-        return { error }
+        });
+        return { error };
       }
 
       // Update local state
-      setProfile(prev => prev ? { ...prev, ...updates } : null)
+      setProfile(prev => prev ? { ...prev, ...updates } : null);
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
-      })
+      });
 
-      return { error: null }
+      return { error: null };
     } catch (error) {
-      console.error('Error updating profile:', error)
-      return { error }
+      console.error('Error updating profile:', error);
+      return { error };
     }
-  }
-
-  const value = {
-    user,
-    profile,
-    session: user ? { user } : null,
-    loading: !isLoaded,
-    signOut,
-    updateProfile,
-    supabaseUserId
-  }
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        session,
+        loading,
+        signOut: handleSignOut,
+        updateProfile,
+        supabaseUserId,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context
-}
+  return context;
+};

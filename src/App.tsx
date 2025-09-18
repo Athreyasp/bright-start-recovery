@@ -3,10 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ClerkProvider } from '@clerk/clerk-react';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { ClerkAuthForm } from "@/components/auth/ClerkAuthForm";
+import { AuthForm } from "@/components/auth/AuthForm";
 import LandingPage from "./components/LandingPage";
 import Dashboard from "./components/Dashboard";
 import RiskCalculator from "./components/RiskCalculator";
@@ -21,19 +20,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Get Clerk publishable key from environment 
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_YWJzb2x1dGUtc3BhcnJvdy0yNC5jbGVyay5hY2NvdW50cy5kZXYk";
-
 const App = () => {
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-          <Routes>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+        <Routes>
             <Route path="/" element={
               <ProtectedRoute requireAuth={false}>
                 <LandingPage />
@@ -88,7 +83,7 @@ const App = () => {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/auth" element={<ClerkAuthForm />} />
+            <Route path="/auth" element={<AuthForm />} />
             <Route path="/dashboard/profile" element={
               <ProtectedRoute>
                 <DashboardLayout>
@@ -103,7 +98,6 @@ const App = () => {
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  </ClerkProvider>
   );
 };
 

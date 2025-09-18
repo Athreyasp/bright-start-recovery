@@ -65,7 +65,7 @@ const UserProfile = () => {
               </div>
                <div className="space-y-2">
                  <Label>Email</Label>
-                 <Input value={user?.primaryEmailAddress?.emailAddress || ''} disabled />
+                 <Input value={user?.email || ''} disabled />
                </div>
             </div>
 
