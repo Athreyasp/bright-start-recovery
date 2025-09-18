@@ -3,7 +3,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import type { Database } from '@/integrations/supabase/types'
 import { useToast } from '@/hooks/use-toast'
-import { useNavigate } from 'react-router-dom'
+
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
-  const navigate = useNavigate()
 
   useEffect(() => {
     // Get initial session
@@ -51,10 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => {
             fetchProfile(session.user.id)
           }, 0)
-          // Redirect to dashboard on successful login
-          if (event === 'SIGNED_IN') {
-            navigate('/dashboard')
-          }
+          // Note: Navigation will be handled by ProtectedRoute component
         } else {
           setProfile(null)
         }
@@ -145,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase
       .from('profiles')
       .update(updates)
-      .eq('id', user.id)
+      .eq('user_id', user.id)
 
     if (!error) {
       setProfile(prev => prev ? { ...prev, ...updates } : null)

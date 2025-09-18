@@ -24,7 +24,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   }
 
   // If we're on the landing page and user is authenticated, redirect to dashboard
-  if (location.pathname === "/" && user) {
+  if (location.pathname === "/" && user && !loading) {
     return <Navigate to="/dashboard" replace />;
   }
 
