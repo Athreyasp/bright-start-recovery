@@ -20,22 +20,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Function to generate a consistent UUID from Clerk user ID
 const generateSupabaseUserId = (clerkUserId: string): string => {
-  // Create a consistent UUID by hashing the Clerk user ID
+  // Use a more robust method to create a consistent UUID from the Clerk user ID
   // This ensures the same Clerk user always gets the same UUID
-  const encoder = new TextEncoder()
-  const data = encoder.encode(clerkUserId)
   
-  // Simple hash to create UUID-like string
-  let hash = 0
-  for (let i = 0; i < data.length; i++) {
-    const char = data[i]
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash // Convert to 32-bit integer
+  // Simple hash function to create a pseudo-UUID
+  let hash1 = 0, hash2 = 0;
+  
+  for (let i = 0; i < clerkUserId.length; i++) {
+    const char = clerkUserId.charCodeAt(i);
+    hash1 = ((hash1 << 5) - hash1) + char;
+    hash1 = hash1 & hash1; // Convert to 32-bit integer
+    hash2 = ((hash2 << 3) - hash2) + char;
+    hash2 = hash2 & hash2;
   }
   
-  // Convert to UUID format
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-4${hex.slice(1, 4)}-a${hex.slice(0, 3)}-${hex.slice(0, 12).padStart(12, '0')}`
+  // Create UUID format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+  const hex1 = Math.abs(hash1).toString(16).padStart(8, '0').substring(0, 8);
+  const hex2 = Math.abs(hash2).toString(16).padStart(8, '0').substring(0, 8);
+  
+  return `${hex1.substring(0, 8)}-${hex1.substring(0, 4)}-4${hex1.substring(1, 4)}-a${hex2.substring(0, 3)}-${hex2.substring(0, 12).padStart(12, '0')}`;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
