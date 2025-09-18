@@ -286,10 +286,10 @@ export default function StressCalculator() {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
+    if (!user || !supabaseUserId) {
       toast({
         title: "Authentication required",
-        description: "Please log in to save your assessment",
+        description: "Please log in and wait a moment for your profile to initialize.",
         variant: "destructive"
       });
       return;
@@ -331,11 +331,11 @@ export default function StressCalculator() {
         title: "Assessment completed",
         description: "Your stress assessment has been saved successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving assessment:', error);
       toast({
         title: "Error",
-        description: "Failed to save assessment. Please try again.",
+        description: `Failed to save assessment: ${error?.message || error?.hint || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {

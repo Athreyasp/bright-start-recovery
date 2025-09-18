@@ -150,7 +150,14 @@ const RiskCalculator = () => {
   };
 
   const calculateRisk = async () => {
-    if (!user) return;
+    if (!user || !supabaseUserId) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in and wait a moment for your profile to initialize.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setSaving(true);
     
@@ -221,11 +228,11 @@ const RiskCalculator = () => {
         title: "Assessment Complete",
         description: "Your risk assessment has been saved and personalized recommendations generated.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving assessment:', error);
       toast({
         title: "Error",
-        description: "Failed to save assessment. Please try again.",
+        description: `Failed to save assessment: ${error?.message || error?.hint || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {

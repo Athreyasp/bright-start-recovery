@@ -57,7 +57,7 @@ const DailyCheckIn = () => {
         .select('*')
         .eq('user_id', supabaseUserId)
         .eq('date', today)
-        .single();
+        .maybeSingle();
 
       if (data) {
         setExistingCheckIn(data);
@@ -142,11 +142,11 @@ const DailyCheckIn = () => {
 
       // Refresh data
       await loadTodaysCheckIn();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving check-in:', error);
       toast({
         title: "Error",
-        description: "Failed to save your check-in. Please try again.",
+        description: `Failed to save your check-in: ${error?.message || error?.hint || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {

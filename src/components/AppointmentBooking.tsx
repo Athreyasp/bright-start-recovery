@@ -84,7 +84,14 @@ const AppointmentBooking = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user || !supabaseUserId) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in and wait a moment for your profile to initialize.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     if (!formData.providerType || !formData.appointmentDate || !formData.appointmentTime) {
       toast({
@@ -127,11 +134,11 @@ const AppointmentBooking = () => {
       });
       setShowBookingForm(false);
       await fetchAppointments();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error scheduling appointment:', error);
       toast({
         title: "Error",
-        description: "Failed to schedule appointment. Please try again.",
+        description: `Failed to schedule appointment: ${error?.message || error?.hint || 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {
