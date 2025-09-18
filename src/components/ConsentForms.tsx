@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const ConsentForms = () => {
-  const { user } = useAuth();
+  const { user, supabaseUserId } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,13 +42,13 @@ const ConsentForms = () => {
   }, [user]);
 
   const fetchConsentForms = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     try {
       const { data, error } = await supabase
         .from('consent_forms')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', supabaseUserId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -76,7 +76,7 @@ const ConsentForms = () => {
     
     try {
       const { error } = await supabase.from('consent_forms').insert({
-        user_id: user.id,
+        user_id: supabaseUserId,
         form_type: formData.formType,
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,

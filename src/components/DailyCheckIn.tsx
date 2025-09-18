@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const DailyCheckIn = () => {
-  const { user } = useAuth();
+  const { user, supabaseUserId } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,14 +48,14 @@ const DailyCheckIn = () => {
   }, [user]);
 
   const loadTodaysCheckIn = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     try {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('daily_check_ins')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', supabaseUserId)
         .eq('date', today)
         .single();
 
@@ -98,14 +98,14 @@ const DailyCheckIn = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     setSaving(true);
     
     try {
       const today = new Date().toISOString().split('T')[0];
       const checkInData = {
-        user_id: user.id,
+        user_id: supabaseUserId,
         date: today,
         mood: formData.moodScore[0],
         stress: formData.stressLevel[0],

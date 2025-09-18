@@ -83,7 +83,7 @@ const recoveryResources = [
 ];
 
 const RiskCalculator = () => {
-  const { user } = useAuth();
+  const { user, supabaseUserId } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -111,14 +111,14 @@ const RiskCalculator = () => {
   }, [user]);
 
   const loadPreviousAssessment = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('risk_assessments')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', supabaseUserId)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -206,7 +206,7 @@ const RiskCalculator = () => {
       };
 
       const { error } = await supabase.from('risk_assessments').insert({
-        user_id: user.id,
+        user_id: supabaseUserId,
         score: finalScore,
         responses: responseData
       });

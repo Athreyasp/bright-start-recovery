@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, supabaseUserId } = useAuth();
   const { toast } = useToast();
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [todayCheckIn, setTodayCheckIn] = useState<any | null>(null);
@@ -21,18 +21,18 @@ const Dashboard = () => {
   const [totalCheckIns, setTotalCheckIns] = useState<number>(0);
 
   useEffect(() => {
-    if (user) {
+    if (supabaseUserId) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, [supabaseUserId]);
 
   const fetchDashboardData = async () => {
-    if (!user) {
-      console.log('No user found, skipping dashboard data fetch');
+    if (!supabaseUserId) {
+      console.log('No supabase user ID found, skipping dashboard data fetch');
       return;
     }
     
-    console.log('Fetching dashboard data for user:', user.id);
+    console.log('Fetching dashboard data for user:', supabaseUserId);
     try {
       const today = new Date().toISOString().split('T')[0];
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -49,7 +49,7 @@ const Dashboard = () => {
         supabase
           .from('risk_assessments')
           .select('score')
-          .eq('user_id', user.id)
+          .eq('user_id', supabaseUserId)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle(),
@@ -58,7 +58,7 @@ const Dashboard = () => {
         supabase
           .from('daily_check_ins')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', supabaseUserId)
           .eq('date', today)
           .maybeSingle(),
 
@@ -66,14 +66,14 @@ const Dashboard = () => {
         supabase
           .from('daily_check_ins')
           .select('date')
-          .eq('user_id', user.id)
+          .eq('user_id', supabaseUserId)
           .gte('date', weekAgo),
 
         // Get upcoming appointments
         supabase
           .from('appointments')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', supabaseUserId)
           .gte('appointment_date', today)
           .order('appointment_date', { ascending: true })
           .limit(3),
@@ -82,13 +82,13 @@ const Dashboard = () => {
         supabase
           .from('daily_check_ins')
           .select('date')
-          .eq('user_id', user.id),
+          .eq('user_id', supabaseUserId),
 
         // Calculate streak (consecutive check-ins)
         supabase
           .from('daily_check_ins')
           .select('date')
-          .eq('user_id', user.id)
+          .eq('user_id', supabaseUserId)
           .order('date', { ascending: false })
           .limit(30)
       ]);

@@ -131,7 +131,7 @@ const recoveryResources = [
 ];
 
 export default function StressCalculator() {
-  const { user } = useAuth();
+  const { user, supabaseUserId } = useAuth();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState<Partial<StressAssessment>>({
@@ -165,14 +165,14 @@ export default function StressCalculator() {
   }, [user]);
 
   const loadPreviousAssessment = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('stress_assessments')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', supabaseUserId)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
@@ -300,7 +300,7 @@ export default function StressCalculator() {
     
     try {
       const assessmentData = {
-        user_id: user.id,
+        user_id: supabaseUserId,
         stress_level: formData.stress_level || 5,
         sleep_hours: formData.sleep_hours || 7,
         exercise_frequency: formData.exercise_frequency || 3,

@@ -1,134 +1,119 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, AuthError } from '@supabase/supabase-js'
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react'
 import { supabase } from '@/integrations/supabase/client'
 import type { Database } from '@/integrations/supabase/types'
 import { useToast } from '@/hooks/use-toast'
 
-
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 interface AuthContextType {
-  user: User | null
+  user: any // Clerk user object
   profile: Profile | null
-  session: Session | null
+  session: any
   loading: boolean
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
-  signInWithGoogle: () => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>
+  supabaseUserId: string | null // The UUID we use for Supabase operations
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// Function to generate a consistent UUID from Clerk user ID
+const generateSupabaseUserId = (clerkUserId: string): string => {
+  // Create a consistent UUID by hashing the Clerk user ID
+  // This ensures the same Clerk user always gets the same UUID
+  const encoder = new TextEncoder()
+  const data = encoder.encode(clerkUserId)
+  
+  // Simple hash to create UUID-like string
+  let hash = 0
+  for (let i = 0; i < data.length; i++) {
+    const char = data[i]
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  
+  // Convert to UUID format
+  const hex = Math.abs(hash).toString(16).padStart(8, '0')
+  return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-4${hex.slice(1, 4)}-a${hex.slice(0, 3)}-${hex.slice(0, 12).padStart(12, '0')}`
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const { user, isLoaded } = useUser()
+  const { signOut: clerkSignOut } = useClerkAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      }
-      setLoading(false)
-    })
+    if (isLoaded && user) {
+      // Generate consistent UUID for this Clerk user
+      const generatedUserId = generateSupabaseUserId(user.id)
+      setSupabaseUserId(generatedUserId)
+      
+      // Fetch or create profile
+      fetchOrCreateProfile(generatedUserId, user)
+    } else if (isLoaded && !user) {
+      setProfile(null)
+      setSupabaseUserId(null)
+    }
+  }, [user, isLoaded])
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        
-        if (session?.user) {
-          // Use setTimeout to defer async operations and prevent deadlocks
-          setTimeout(() => {
-            fetchProfile(session.user.id)
-          }, 0)
-          // Note: Navigation will be handled by ProtectedRoute component
-        } else {
-          setProfile(null)
-        }
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const fetchProfile = async (userId: string) => {
+  const fetchOrCreateProfile = async (userId: string, clerkUser: any) => {
     try {
-      const { data, error } = await supabase
+      // Try to fetch existing profile
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle()
 
-      if (error) {
-        throw error
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', fetchError)
+        return
       }
 
-      setProfile(data)
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    }
-  }
+      if (existingProfile) {
+        setProfile(existingProfile)
+      } else {
+        // Create new profile for this user
+        const newProfile = {
+          user_id: userId,
+          full_name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || clerkUser.primaryEmailAddress?.emailAddress || 'User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName
+        const { data: createdProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert(newProfile)
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('Error creating profile:', createError)
+          toast({
+            title: "Profile Creation Error",
+            description: "Failed to create user profile. Please try again.",
+            variant: "destructive"
+          })
+        } else {
+          setProfile(createdProfile)
+          toast({
+            title: "Welcome to QuitBuddy!",
+            description: "Your profile has been created successfully.",
+          })
         }
       }
-    })
-
-    if (!error) {
-      toast({
-        title: "Welcome to QuitBuddy!",
-        description: "Please check your email to verify your account.",
-      })
+    } catch (error) {
+      console.error('Error in fetchOrCreateProfile:', error)
     }
-
-    return { error }
-  }
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-
-    if (!error) {
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully signed in.",
-      })
-    }
-
-    return { error }
-  }
-
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
-    })
-
-    return { error }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await clerkSignOut()
+    setProfile(null)
+    setSupabaseUserId(null)
     toast({
       title: "Signed out",
       description: "You've been successfully signed out.",
@@ -136,34 +121,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return { error: new Error('No user') }
+    if (!supabaseUserId) {
+      return { error: new Error('No user ID available') }
+    }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('user_id', user.id)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', supabaseUserId)
 
-    if (!error) {
+      if (error) {
+        toast({
+          title: "Update Error",
+          description: "Failed to update profile. Please try again.",
+          variant: "destructive"
+        })
+        return { error }
+      }
+
+      // Update local state
       setProfile(prev => prev ? { ...prev, ...updates } : null)
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       })
-    }
 
-    return { error }
+      return { error: null }
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      return { error }
+    }
   }
 
   const value = {
     user,
     profile,
-    session,
-    loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
+    session: user ? { user } : null,
+    loading: !isLoaded,
     signOut,
-    updateProfile
+    updateProfile,
+    supabaseUserId
   }
 
   return (

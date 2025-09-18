@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 const AppointmentBooking = () => {
-  const { user } = useAuth();
+  const { user, supabaseUserId } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -65,13 +65,13 @@ const AppointmentBooking = () => {
   }, [user]);
 
   const fetchAppointments = async () => {
-    if (!user) return;
+    if (!supabaseUserId) return;
     
     try {
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', supabaseUserId)
         .order('appointment_date', { ascending: true });
 
       if (error) throw error;
@@ -99,7 +99,7 @@ const AppointmentBooking = () => {
     
     try {
       const { error } = await supabase.from('appointments').insert({
-        user_id: user.id,
+        user_id: supabaseUserId,
         provider_type: formData.providerType,
         provider_name: formData.providerName || null,
         appointment_date: formData.appointmentDate,

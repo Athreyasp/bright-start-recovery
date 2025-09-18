@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthForm } from "./AuthForm";
+import { ClerkAuthForm } from "./ClerkAuthForm";
 import { Loader2 } from "lucide-react";
 import { useLocation, Navigate } from "react-router-dom";
 
@@ -30,7 +30,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
 
   // For dashboard routes, require authentication
   if (requireAuth && !user) {
-    return <AuthForm />;
+    return <ClerkAuthForm />;
   }
 
   // For landing page when not authenticated, show the landing page
