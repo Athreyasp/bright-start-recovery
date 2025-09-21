@@ -274,3 +274,68 @@ All colors MUST be HSL.
 .animate-enter {
   animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Enhanced chatbot animations */
+@keyframes chatbot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px hsl(var(--primary) / 0);
+  }
+}
+
+.chatbot-launcher {
+  animation: chatbot-pulse 2s infinite;
+}
+
+@keyframes recording-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.recording-indicator {
+  animation: recording-pulse 1s infinite;
+}
+
+@keyframes audio-wave {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+.audio-playing {
+  animation: audio-wave 0.5s infinite;
+}
+
+/* Modern message bubble animations */
+@keyframes messageSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-bubble {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Enhanced glass morphism for chatbot */
+.chatbot-glass {
+  background: hsla(var(--background), 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid hsla(var(--border), 0.3);
+}

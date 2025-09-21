@@ -4,15 +4,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { MessageCircle, X, Send, RotateCcw, Trash2, Copy, Clock, AlertCircle } from 'lucide-react'
+import { MessageCircle, X, Send, RotateCcw, Trash2, Copy, Clock, AlertCircle, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { AudioRecorder, blobToBase64 } from '@/utils/AudioRecorder'
+import { AudioPlayer } from '@/utils/AudioPlayer'
 
 interface ChatMessage { 
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
   id: string
+  hasAudio?: boolean
+  isAudioMessage?: boolean
 }
 
 export default function ChatBot() {
@@ -20,16 +24,22 @@ export default function ChatBot() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [audioEnabled, setAudioEnabled] = useState(true)
   const { toast } = useToast()
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       role: 'assistant', 
-      content: 'Hi! I\'m your AI recovery assistant. I\'m here to support you 24/7. How can I help you today?',
+      content: 'Hi! I\'m your AI recovery assistant. I\'m here to support you 24/7. How can I help you today? You can type or use voice messages!',
       timestamp: new Date(),
-      id: 'welcome'
+      id: 'welcome',
+      hasAudio: true
     }
   ])
   const endRef = useRef<HTMLDivElement | null>(null)
+  const audioRecorderRef = useRef<AudioRecorder | null>(null)
+  const audioPlayerRef = useRef<AudioPlayer | null>(null)
 
   // Quick action buttons for common questions
   const quickActions = [
@@ -42,6 +52,16 @@ export default function ChatBot() {
   useEffect(() => { 
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, open])
+
+  useEffect(() => {
+    // Initialize audio player
+    audioPlayerRef.current = new AudioPlayer()
+    
+    return () => {
+      audioPlayerRef.current?.stop()
+      audioRecorderRef.current = null
+    }
+  }, [])
 
   const generateMessageId = () => Math.random().toString(36).substring(2, 15)
 
@@ -57,9 +77,10 @@ export default function ChatBot() {
   const clearConversation = () => {
     setMessages([{
       role: 'assistant',
-      content: 'Hi! I\'m your AI recovery assistant. I\'m here to support you 24/7. How can I help you today?',
+      content: 'Hi! I\'m your AI recovery assistant. I\'m here to support you 24/7. How can I help you today? You can type or use voice messages!',
       timestamp: new Date(),
-      id: 'welcome'
+      id: 'welcome',
+      hasAudio: true
     }])
     toast({ title: "Conversation cleared", duration: 2000 })
   }
@@ -69,7 +90,7 @@ export default function ChatBot() {
     sendMessage(questionText)
   }
 
-  const sendMessage = async (messageText?: string) => {
+  const sendMessage = async (messageText?: string, isFromAudio = false) => {
     const textToSend = messageText || input.trim()
     if (!textToSend || loading) return
     
@@ -77,7 +98,8 @@ export default function ChatBot() {
       role: 'user',
       content: textToSend,
       timestamp: new Date(),
-      id: generateMessageId()
+      id: generateMessageId(),
+      isAudioMessage: isFromAudio
     }
     
     const newMessages: ChatMessage[] = [...messages, userMessage]
@@ -97,10 +119,31 @@ export default function ChatBot() {
         role: 'assistant',
         content: data.reply,
         timestamp: new Date(),
-        id: generateMessageId()
+        id: generateMessageId(),
+        hasAudio: audioEnabled
       }
       
       setMessages([...newMessages, assistantMessage])
+      
+      // Generate audio for AI response if audio is enabled
+      if (audioEnabled && data.reply) {
+        try {
+          const { data: audioData, error: audioError } = await supabase.functions.invoke('text-to-speech', {
+            body: { text: data.reply, voice: 'alloy' }
+          })
+          
+          if (audioError) throw audioError
+          
+          if (audioData?.audioContent && audioPlayerRef.current) {
+            setIsPlaying(true)
+            await audioPlayerRef.current.playAudioFromBase64(audioData.audioContent)
+            setIsPlaying(false)
+          }
+        } catch (audioError) {
+          console.error('Audio generation error:', audioError)
+          // Don't show error toast for audio failure, just continue
+        }
+      }
       
     } catch (error: any) {
       console.error('Chat error:', error)
@@ -122,6 +165,103 @@ export default function ChatBot() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      setIsRecording(true)
+      
+      audioRecorderRef.current = new AudioRecorder(
+        () => {}, // onDataAvailable - not needed for our use case
+        async (audioBlob: Blob) => {
+          try {
+            const base64Audio = await blobToBase64(audioBlob)
+            
+            // Convert audio to text
+            const { data, error } = await supabase.functions.invoke('speech-to-text', {
+              body: { audio: base64Audio }
+            })
+            
+            if (error) throw error
+            
+            if (data?.text) {
+              await sendMessage(data.text, true)
+            } else {
+              toast({
+                title: "No speech detected",
+                description: "Please try speaking again.",
+                duration: 2000
+              })
+            }
+          } catch (error) {
+            console.error('Speech-to-text error:', error)
+            toast({
+              title: "Speech recognition failed",
+              description: "Please try again or use text input.",
+              variant: "destructive",
+              duration: 3000
+            })
+          }
+        }
+      )
+      
+      await audioRecorderRef.current.startRecording()
+      
+      toast({
+        title: "Recording started",
+        description: "Speak your message now...",
+        duration: 2000
+      })
+      
+    } catch (error) {
+      console.error('Recording error:', error)
+      setIsRecording(false)
+      toast({
+        title: "Recording failed",
+        description: "Please check microphone permissions.",
+        variant: "destructive",
+        duration: 3000
+      })
+    }
+  }
+
+  const stopRecording = () => {
+    if (audioRecorderRef.current && isRecording) {
+      audioRecorderRef.current.stopRecording()
+      setIsRecording(false)
+      toast({
+        title: "Recording stopped",
+        description: "Processing your message...",
+        duration: 2000
+      })
+    }
+  }
+
+  const playMessageAudio = async (message: ChatMessage) => {
+    if (!audioPlayerRef.current || isPlaying || !message.hasAudio) return
+    
+    try {
+      setIsPlaying(true)
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { text: message.content, voice: 'alloy' }
+      })
+      
+      if (error) throw error
+      
+      if (data?.audioContent) {
+        await audioPlayerRef.current.playAudioFromBase64(data.audioContent)
+      }
+    } catch (error) {
+      console.error('Audio playback error:', error)
+      toast({
+        title: "Audio playback failed",
+        description: "Please try again.",
+        variant: "destructive",
+        duration: 2000
+      })
+    } finally {
+      setIsPlaying(false)
     }
   }
 
@@ -172,10 +312,23 @@ export default function ChatBot() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">AI Recovery Assistant</p>
-                  <p className="text-xs text-muted-foreground">Here to support your wellness journey</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span>Voice & text support</span>
+                    {isPlaying && <Volume2 className="w-3 h-3 text-success animate-pulse" />}
+                    {isRecording && <Mic className="w-3 h-3 text-destructive animate-pulse" />}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setAudioEnabled(!audioEnabled)}
+                  className={`h-8 w-8 p-0 ${audioEnabled ? 'hover:bg-success/20' : 'hover:bg-muted/20'}`}
+                  title={audioEnabled ? 'Disable audio' : 'Enable audio'}
+                >
+                  {audioEnabled ? <Volume2 className="w-3 h-3 text-success" /> : <VolumeX className="w-3 h-3 text-muted-foreground" />}
+                </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -219,7 +372,24 @@ export default function ChatBot() {
                         ? 'bg-primary text-primary-foreground shadow-primary/20' 
                         : 'bg-muted border border-border/50 text-foreground'
                     }`}>
-                      {m.content}
+                      <div className="flex items-start gap-2">
+                        {m.isAudioMessage && (
+                          <Mic className="w-3 h-3 mt-0.5 text-current opacity-60" />
+                        )}
+                        <span className="flex-1">{m.content}</span>
+                        {m.hasAudio && m.role === 'assistant' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => playMessageAudio(m)}
+                            className="h-auto p-1 hover:bg-background/20"
+                            title="Play audio"
+                            disabled={isPlaying}
+                          >
+                            <Volume2 className={`w-3 h-3 ${isPlaying ? 'animate-pulse' : ''}`} />
+                          </Button>
+                        )}
+                      </div>
                       <div className="flex items-center justify-between mt-2 text-xs opacity-70">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
@@ -278,19 +448,28 @@ export default function ChatBot() {
                 </div>
               )}
               
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={loading ? 'AI is responding...' : 'Ask me anything about your recovery journey...'}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  disabled={loading}
+                  placeholder={loading ? 'AI is responding...' : isRecording ? 'Recording... Click stop when done' : 'Type a message or use voice...'}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && !isRecording && sendMessage()}
+                  disabled={loading || isRecording}
                   className="flex-1 border-border/50 focus-visible:ring-primary/50 bg-background/60"
                   maxLength={500}
                 />
                 <Button 
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={loading}
+                  variant={isRecording ? "destructive" : "outline"}
+                  className={`shrink-0 w-12 h-10 ${isRecording ? 'animate-pulse' : 'hover:bg-primary/10'}`}
+                  title={isRecording ? 'Stop recording' : 'Start voice recording'}
+                >
+                  {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </Button>
+                <Button 
                   onClick={() => sendMessage()} 
-                  disabled={loading || !input.trim()} 
+                  disabled={loading || !input.trim() || isRecording} 
                   className="shrink-0 px-4 shadow-lg hover:shadow-xl transition-all duration-200"
                   size="default"
                 >
@@ -299,7 +478,10 @@ export default function ChatBot() {
               </div>
               
               <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                <span>Your AI assistant is here 24/7 to support you</span>
+                <span className="flex items-center gap-2">
+                  <span>24/7 voice & text support</span>
+                  {audioEnabled && <Badge variant="secondary" className="text-xs px-1.5 py-0.5">Audio ON</Badge>}
+                </span>
                 <span>{input.length}/500</span>
               </div>
             </div>
